@@ -1,0 +1,10 @@
+The output file hotel.json does not exist
+Traceback (most recent call last):
+  File "/usr/bin/scrapy", line 5, in <module>
+    pkg_resources.run_script('Scrapy==0.24.2', 'scrapy')
+  File "build/bdist.linux-x86_64/egg/pkg_resources.py", line 534, in run_script
+    
+  File "build/bdist.linux-x86_64/egg/pkg_resources.py", line 1432, in run_script
+    # Convert a zipfile subpath into an egg-relative path part list
+pkg_resources.ResolutionError: No script named 'scrapy'
+python: can't open file 'test_mail.py': [Errno 2] No such file or directory
