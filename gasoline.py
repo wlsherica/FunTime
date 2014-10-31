@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# calculate the best L for gasoline
 import math
 import decimal
 from decimal import *
