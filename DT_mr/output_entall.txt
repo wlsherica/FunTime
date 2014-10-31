@@ -1,0 +1,13 @@
+var00;Sunny	5
+allcnt	14
+var01;Hot	4
+var00;Overcast	4
+var02;Normal	7
+var03;True	6
+outcome;No	5
+var00;Rainy	5
+var01;Mild	6
+outcome;Yes	9
+var01;Cool	4
+var02;High	7
+var03;False	8

@@ -1,0 +1,1 @@
+var00:Overcast,Rainy,Sunny	

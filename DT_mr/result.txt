@@ -1,0 +1,1 @@
+{"json": {"rules": "Overcast,Rainy,Sunny\t\n", "name": "root#var00", "parent": "root", "level": "0"}, "name": "var00", "igr": "0.156427562421\n"}
