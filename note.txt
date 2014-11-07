@@ -1,0 +1,6 @@
+#install Luigi
+pip install luigi
+pip install tornado
+
+#in python
+> from luigi import server
