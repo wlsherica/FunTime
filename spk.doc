@@ -15,6 +15,17 @@ sc.textFile("hdfs://cdh4-n.migosoft.com/user/training/text_mining/forum/PTTCar/2
 val file = sc.textFile("hdfs://cdh4-n.migosoft.com/user/training/text_mining/forum/PTTCar/20140621.xml.hadoop")
 file.count()
 
+------- spark on yarn 20141111
+#test success!
+./bin/spark-class org.apache.spark.deploy.yarn.Client --jar /usr/lib/spark/examples/lib/spark-examples-1.1.0-cdh5.2.0-hadoop2.5.0-cdh5.2.0.jar --class org.apache.spark.examples.JavaWordCount --args hdfs://cdh4-n.migosoft.com//user/root/sample_libsvm_data.txt --name "word count on spark" 
+
+vim /etc/spark/conf.dist/spark-env.sh
+#add slaves
+vim conf/slaves
+
+scp -r ~/.ssh root@10.0.1.18:~/
+ssh root@10.0.1.16 "hostname"
+
 ---
 ./bin/pyspark
 textFile = sc.textFile("hdfs://cdh4-n.migosoft.com/user/athena/data_prepare")
