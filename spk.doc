@@ -19,14 +19,25 @@ file.count()
 #test success!
 ./bin/spark-class org.apache.spark.deploy.yarn.Client --jar /usr/lib/spark/examples/lib/spark-examples-1.1.0-cdh5.2.0-hadoop2.5.0-cdh5.2.0.jar --class org.apache.spark.examples.JavaWordCount --args hdfs://cdh4-n.migosoft.com//user/root/sample_libsvm_data.txt --name "word count on spark" 
 
+#20141112 test success
+#yarn client pi jar
+./bin/spark-submit --master yarn-client --class org.apache.spark.examples.SparkPi --master yarn /usr/lib/spark/examples/lib/spark-examples-1.1.0-cdh5.2.0-hadoop2.5.0-cdh5.2.0.jar 10
+#yarn clent wordcount jar
+./bin/spark-submit --master yarn-client --class org.apache.spark.examples.JavaWordCount /usr/lib/spark/examples/lib/spark-examples-1.1.0-cdh5.2.0-hadoop2.5.0-cdh5.2.0.jar hdfs://cdh4-n.migosoft.com/user/root/data.dat
+#localhost master wordcount jar
+./bin/spark-submit --master spark://cdh4-dn2:7077 --class org.apache.spark.examples.JavaWordCount /usr/lib/spark/examples/lib/spark-examples-1.1.0-cdh5.2.0-hadoop2.5.0-cdh5.2.0.jar hdfs://cdh4-n.migosoft.com/user/root/data.dat
+
+#modified spark env 
 vim /etc/spark/conf.dist/spark-env.sh
 #add slaves
 vim conf/slaves
 
+#add public key to all nodes
 scp -r ~/.ssh root@10.0.1.18:~/
 ssh root@10.0.1.16 "hostname"
 
----
+
+# original note
 ./bin/pyspark
 textFile = sc.textFile("hdfs://cdh4-n.migosoft.com/user/athena/data_prepare")
 textFile.count()
