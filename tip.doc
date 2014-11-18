@@ -155,3 +155,10 @@ Out[32]: {'C': {'1': 'name', '2': 'card'}, 'N': {'3': 'shop'}}
 
 ln -s /usr/local/lib/libevent-2.0.so.5 /usr/lib64/libevent-2.0.so.5
 
+##add jps command
+[root@cdh4-dn2 spark]# updatedb
+[root@cdh4-dn2 spark]# locate jps
+alias jps='/usr/java/jdk1.6.0_31/bin/jps'
+[root@cdh4-dn2 spark]# vim ~/.bashrc
+[root@cdh4-dn2 spark]# source ~/.bashrc
+[root@cdh4-dn2 spark]# jps
