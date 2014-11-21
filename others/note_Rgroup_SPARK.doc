@@ -1,0 +1,84 @@
+
+#The following note was for SPARK lecture from RGroup 201411
+
+Partitions
+Dependencies
+Compute function(for each part)
+-> above -> linage
+Partitioned
+-> optional
+
+Narrow dependencies
+->key已經先分好
+Wide dependencies
+->key還沒分好, 增加shuffle工作量
+
+HadoopRDD
+Partitions=one per hdfs block
+Dependencies=none
+Compute fun=read corresponding block
+Preffered locations=HDFS block location
+Partitioner=none
+
+FilterRDD
+Partitions=one to one, same as parent RDD
+Dependencies=1 to 1
+Compute fun(part)=compute parent and filter it
+Preffered locations(part)=none(ask parent)
+Partitioner=none
+
+JoinRDD
+Partitions=one per reduce task
+Dependencies=shuffle on each parent
+Compute fun=read and join shuffle data
+Preffered locations=none
+Partitioner=HashPartitioner(numTasks)
+
+file.partitions
+#related with your cores
+
+shuffle
+跨stage之間要做shuffle
+redistribution data among partitions
+hash keys into buckets
+Optimization:
+1)avoided when possible
+->能不做shuffle就不shuffle
+2)partial aggregation(e.g. reducebykey)
+pulled based, not push-based
+generated intermediate products
+就是將key整理一番,有得grpby的就先整合再往下stage2
+
+1.too few partition
+2.large perkey groupby, shipped all data on cluster
+
+Note:
+1.Enough partitions
+2. Minimized memory (large groupby, sorting)
+3. Minimized amount of data shuffled
+4. Standard library know how
+
+#Partition tuning
+如何適當分散資料
+Too few partitions
+1. Less concurrency
+2. increased memory pressure for groupbykey, reducebykey, sortbykey
+Too many partitions
+1. Scheduling overhead
+
+100-10000 fine, reasonable number
+2cores-> 4partitions (2X)
+upper bound-at least 100ms
+
+e.g. scala code
+
+sc.textfile
+.repartition(6) #讀出來之後打散
+.distinct #RDD裡面重複資料去重 可改寫成=> .distinct(numPartitions=6)
+.map(name => (name.charat(0),1))
+.reducebykey(_+_)
+#.mapvalues(name => name.size)
+.collect()
+
+sparkSQL
+
