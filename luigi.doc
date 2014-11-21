@@ -1,0 +1,12 @@
+#2014/11/21
+How to reject the duplicated tasks?
+Hadoop folder, MD5
+/var/tmp/luigi/${MD5}.pid
+
+Luigi scheduling
+DAGs in luigi tasks
+1) DFS
+2) BFS
+
+Random selection for 1st job
+

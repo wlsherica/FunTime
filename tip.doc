@@ -1,19 +1,18 @@
+
+#how to install BIND
+Rpm -qa | grep bind
+yum install bind
+yum install bind-utils
+
 lzcat Guest.dump.gz | cut -f11 | grep -E '2014-*' |head -n 10
-
 cat Cardsalegoods.dump | grep -E '2014-*' > Cardsalegoods.dump_2014
-
 ls -lh
 
 mapred job -list
-
-
 hadoop fs -text /user/training/kddcup/source/*.gz | head -n 10000 | cut -d "," -f42 | sort | uniq -c
-
 hadoop fs -text /user/training/kddcup/source/*.gz | head
-
-[training@cdh4-dn3 bigcode]$ hadoop fs -text /user/training/kddcup/source/*.gz | wc
-¦98431 742579829
-
+hadoop fs -text /user/training/kddcup/source/*.gz | wc
+98431 742579829
 
 wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
 rpm -ivh rpmforge-release-0.5.2-2.el4.rf.x86_64.rpm
