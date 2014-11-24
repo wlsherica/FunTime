@@ -15,7 +15,7 @@ def gas(unitprice):
     q2 = round((decimal.Decimal(str(q))),0)
     q3 = math.floor(p1)
     if q2==q3 and q_str[3]=='4':
-      z = ("%.2f %.2f %.1f %.0f %s" % (i, p1, q, q2, q3))
+      z = ("%.2f %.2f %.1f" % (i, p1, q))
       result.append(z)
       #print ("%.2f %.2f %.1f %.0f %s" % (i, p1, q, q2, q3))
     i += 0.01
@@ -35,4 +35,4 @@ def main():
 
 if __name__ == '__main__':
   main()
-#end
+
