@@ -1,10 +1,14 @@
 # coding=UTF-8
 #for wordcount
+#usage on standalone master mode:./bin/spark-submit --master spark://cdh4-dn2:7077 --executor-memory 3g --driver-memory 1g /data/tmp/wordcount.py hdfs://cdh4-n.migosoft.com/user/rungchi/card_member/part-00000
+#./bin/spark-submit --master spark://cdh4-dn2:7077 --executor-memory 3g --driver-memory 1g /home/erica_li/proj/spark_1D/pandora/modules/luigi_1d/bin/simple.py -d "4:Province:C" -i hdfs://cdh4-n.migosoft.com/user/erica_li/spktest.dat
 #/data/spark/spark-1.0.2-bin-hadoop2/bin/spark-submit 1d.py -d "14:money:N"
 import sys, getopt
 import itertools
 import math
 
+sys.path.append("/data/migo/pandora/lib")
+#from pandora import *
 from pyspark import SparkContext
 
 ENCODING = "utf-8"
@@ -63,6 +67,10 @@ if __name__=="__main__":
         usage()
         sys.exit(2)
 
+    logFile = "hdfs://cdh4-n.migosoft.com/user/erica_li/spktest.dat"
+
+    #spark = SparkContext(appName="simple dimension")
+    #sgRDD = spark.textFile(sys.argv[1])
     dimension = {NUMERIC_TYPE: {}, CATEGORY_TYPE: {}}
 
     for o, a in opts:
@@ -81,7 +89,7 @@ if __name__=="__main__":
         else:
             assert False, "Unhandled Options - %s" %o
 
-    sc = SparkContext(appName="simple dimension")
+    sc = SparkContext(appName="2D dimension")
     sgRDD = sc.textFile(logFile)
 
     getVar = lambda searchList, ind: [searchList[i] for i in ind]
@@ -97,22 +105,22 @@ if __name__=="__main__":
 
     outputFile = "/home/erica_li/proj/spark_1D/pandora/modules/luigi_1d/bin/tmp/%s_%s_%s.json" %(names, ids, typeColumn)
 
-    if 6 not in id_list:
-        raw = sgRDD.map(lambda x:(("_".join(getVar(parserLine(x),id_list)).encode(ENCODING))))
-        cdict = raw.map(lambda word:(word, 1)).countByKey()
+    #if 6 not in id_list:
+    raw = sgRDD.map(lambda x:(("_".join(getVar(parserLine(x),id_list)).encode(ENCODING))))
+    cdict = raw.map(lambda word:(word, 1)).countByKey()
 
-        for columns, val in cdict.items():
-            col1, col2 = columns.split("_")
-            gcnt[id_name[0]][col1][id_name[1]][col2]['COUNT'] = val
-    else:
-        tag = {0: 'NES', 1: 'L', 2: 'R', 3: 'F', 4: 'M'}
-        for i in range(0,5):
-            raw = sgRDD.map(lambda x:(parserLine(x)[id_list[0]].encode(ENCODING)+'_'+parserLine(x)[6].split(",")[i].encode(ENCODING)))
-            cdict = raw.map(lambda word:(word, 1)).countByKey()
-            tmp = {}
-            for columns, val in cdict.items():
-                col1, col2 = columns.split("_")
-                gcnt[id_name[0]][col1][id_name[1]][tag[i]][col2]['COUNT'] = val
+    for columns, val in cdict.items():
+        col1, col2 = columns.split("_")
+        gcnt[id_name[0]][col1][id_name[1]][col2]['COUNT'] = val
+    #else:
+    #    tag = {0: 'NES', 1: 'L', 2: 'R', 3: 'F', 4: 'M'}
+    #    for i in range(0,5):
+    #        raw = sgRDD.map(lambda x:(parserLine(x)[id_list[0]].encode(ENCODING)+'_'+parserLine(x)[6].split(",")[i].encode(ENCODING)))
+    #        cdict = raw.map(lambda word:(word, 1)).countByKey()
+    #        tmp = {}
+    #        for columns, val in cdict.items():
+    #            col1, col2 = columns.split("_")
+    #            gcnt[id_name[0]][col1][id_name[1]][tag[i]][col2]['COUNT'] = val
 
     pool["DATA"] = gcnt
     jsonOut(pool, outputFile)

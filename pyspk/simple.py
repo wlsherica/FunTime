@@ -1,11 +1,14 @@
 # coding=UTF-8
 #for wordcount
-#usage on standalone master mode:./bin/spark-submit --master spark://domain:7077 --executor-memory 3g --driver-memory 1g /data/tmp/wordcount.py hdfs://user/card_member/part-00000
+#usage on standalone master mode:./bin/spark-submit --master spark://cdh4-dn2:7077 --executor-memory 3g --driver-memory 1g /data/tmp/wordcount.py hdfs://cdh4-n.migosoft.com/user/rungchi/card_member/part-00000
+#./bin/spark-submit --master spark://cdh4-dn2:7077 --executor-memory 3g --driver-memory 1g /home/erica_li/proj/spark_1D/pandora/modules/luigi_1d/bin/simple.py -d "4:Province:C" -i hdfs://cdh4-n.migosoft.com/user/erica_li/spktest.dat
 #/data/spark/spark-1.0.2-bin-hadoop2/bin/spark-submit 1d.py -d "14:money:N"
 import sys, getopt
 import itertools
 import math
 
+sys.path.append("/data/migo/pandora/lib")
+#from pandora import *
 from pyspark import SparkContext
 
 ENCODING = "utf-8"
@@ -56,6 +59,10 @@ if __name__=="__main__":
         usage()
         sys.exit(2)
 
+    logFile = "hdfs://cdh4-n.migosoft.com/user/erica_li/spktest.dat"
+
+    #spark = SparkContext(appName="simple dimension")
+    #sgRDD = spark.textFile(sys.argv[1])
     dimension = {NUMERIC_TYPE: {}, CATEGORY_TYPE: {}}
 
     for o, a in opts:
@@ -101,20 +108,20 @@ if __name__=="__main__":
                 pool["DATA"] = {"SUM": sum1, "MAX": maxV, "MIN": minV, "SD": sd, "COUNT": cnt, "MEAN": meanV}
 
             elif typeColumn == CATEGORY_TYPE:
-                if idx != 6:
+                #if idx != 6:
                     #gcnt = raw.map(lambda word:(word, 1)).reduceByKey(add).collect()
-                    cdict = raw.map(lambda word:(word, 1)).countByKey()
-                    for k, v in cdict.items():
-                        gcnt[k] = v
-                else:
-                    tag = {0: 'NES', 1: 'L', 2: 'R', 3: 'F', 4: 'M'}
-                    for i in range(0,5):
-                        #tagdict = raw.map(lambda x:x.split(",")[i]).map(lambda word:(word,1)).reduceByKey(add).collect()
-                        tagdict = raw.map(lambda x:x.split(",")[i]).map(lambda word:(word,1)).countByKey()
-                        tmp = {}
-                        for k, v in tagdict.items():
-                            tmp[k] = v
-                        gcnt[tag[i]] = tmp
+                cdict = raw.map(lambda word:(word, 1)).countByKey()
+                for k, v in cdict.items():
+                    gcnt[k] = v
+                #else:
+                #    tag = {0: 'NES', 1: 'L', 2: 'R', 3: 'F', 4: 'M'}
+                #    for i in range(0,5):
+                #        #tagdict = raw.map(lambda x:x.split(",")[i]).map(lambda word:(word,1)).reduceByKey(add).collect()
+                #        tagdict = raw.map(lambda x:x.split(",")[i]).map(lambda word:(word,1)).countByKey()
+                #        tmp = {}
+                #        for k, v in tagdict.items():
+                #            tmp[k] = v
+                #        gcnt[tag[i]] = tmp
 
                 pool["DATA"] = gcnt
 
