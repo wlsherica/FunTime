@@ -1,9 +1,13 @@
 # coding=UTF-8
 #for wordcount
+#usage on standalone master mode:./bin/spark-submit --master spark://cdh4-dn2:7077 --executor-memory 3g --driver-memory 1g /data/tmp/wordcount.py hdfs://cdh4-n.migosoft.com/user/rungchi/card_member/part-00000
+#./bin/spark-submit --master spark://cdh4-dn2:7077 --executor-memory 3g --driver-memory 1g /home/erica_li/proj/spark_1D/pandora/modules/luigi_1d/bin/simple.py -d "2:Gender:C,3:Age:C,9:Money:N" -i hdfs://cdh4-n.migosoft.com/user/erica_li/spktest.dat
 import sys, getopt
 import itertools
 import math
 
+sys.path.append("/data/migo/pandora/lib")
+#from pandora import *
 from pyspark import SparkContext
 
 ENCODING = "utf-8"
@@ -22,8 +26,9 @@ def smin(a, b):
 def smax(a, b):
     return max(a, b)
 
-def sqrt2(i, mean):
-    return math.pow(float(i)-float(mean), 2)
+def sd(mean, count, sqtsum):
+    meansqt = math.pow(mean, 2)
+    return math.pow((float(sqtsum)/count)-meansqt, 0.5)
 
 def smean(sum, count):
     return sum*1.0/count
@@ -76,6 +81,10 @@ if __name__=="__main__":
         usage()
         sys.exit(2)
 
+    logFile = "hdfs://cdh4-n.migosoft.com/user/erica_li/spktest.dat"
+
+    dimension = {NUMERIC_TYPE: {}, CATEGORY_TYPE: {}}
+
     for o, a in opts:
         if o == "-i":
             logFile = a
@@ -113,27 +122,39 @@ if __name__=="__main__":
 
     raw = sgRDD.map(lambda x: getVar(parserLine(x),list_C+list_N)).cache()
 
-    raw_cnt = raw.map(lambda (x,y,z): (x+"_"+y, 1)).countByKey()
-    raw_sum = raw.map(lambda (x,y,z): (x+"_"+y, z)).reduceByKey(add)
-    
+    #raw_cnt = raw.map(lambda (x,y,z): (x+"_"+y, 1)).countByKey()
+    #raw_sum = raw.map(lambda (x,y,z): (x+"_"+y, z)).reduceByKey(add)
+
+    raw2 = raw.map(lambda (x,y,z): (x+"_"+y, float(z)))
+    sumCount = raw2.combineByKey(lambda value: (value, 1, value**2),
+                                 lambda x, value: (x[0]+value, x[1]+1, x[2]+value**2),
+                                 lambda x, y: (x[0]+y[0], x[1]+y[1], x[2]+y[2]))
+    averageByKey = sumCount.map(lambda (label, (value_sum, count, value_sqt)): (label, str(value_sum)+"_"+str(count)+"_"+str(value_sum/count)+"_"+str(sd(value_sum/count, count, value_sqt))))
+
     raw_min = raw.map(lambda (x,y,z): (x+"_"+y, z)).reduceByKey(smin)
     raw_max = raw.map(lambda (x,y,z): (x+"_"+y, z)).reduceByKey(smax)
 
-    raw_cntRDD = sc.parallelize(raw_cnt.items(),3)
-    raw_mean = raw_sum.join(raw_cntRDD).map(lambda (x, y): (x, tupleDivide(y)))
+    #raw_cntRDD = sc.parallelize(raw_cnt.items(),1)
+    #raw_mean = raw_sum.join(raw_cntRDD).map(lambda (x, y): (x, tupleDivide(y)))
 
-    raw_sd = raw.map(lambda (x,y,z): (x+"_"+y, z)).join(raw_mean)
-    sd0 = raw_sd.map(lambda (x, y): (x, sqrt2(y[0], y[1]))).reduceByKey(add)
-    sd = sd0.join(raw_cntRDD).map(lambda (x, y): (x, (tupleDivide(y)**0.5)))
+    #raw_sd = raw.map(lambda (x,y,z): (x+"_"+y, z)).join(raw_mean)
+    #sd0 = raw_sd.map(lambda (x, y): (x, sqrt2(y[0], y[1]))).reduceByKey(add)
+    #sd = sd0.join(raw_cntRDD).map(lambda (x, y): (x, (tupleDivide(y)**0.5)))
 
     tmp = AutoDict()
 
+    book = {0: "SUM", 1: "COUNT", 2: "MEAN", 3: "SD"}
+    for idx, vals in averageByKey.collect():
+        id1, id2 = idx.split("_")
+        for i, info in enumerate(vals.split("_")):
+            tmp[name_C[0]][id1][name_C[1]][id2][name_N[0]][book[i]] = info
+
     transform(raw_min.collect(), "MIN")
     transform(raw_max.collect(), "MAX")
-    transform(raw_sum.collect(), "SUM")
-    transform(raw_mean.collect(), "MEAN")
-    transform(sd.collect(), "SD")
-    transform(raw_cnt, "COUNT")
+    #transform(raw_sum.collect(), "SUM")
+    #transform(raw_mean.collect(), "MEAN")
+    #transform(sd.collect(), "SD")
+    #transform(raw_cnt, "COUNT")
 
     pool["DATA"] = tmp
 
