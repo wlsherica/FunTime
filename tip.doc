@@ -1,3 +1,10 @@
+#check memory disk
+su root
+cd /
+df -h
+hadoop fs -du /user/tmp
+#remove trash from hsfs
+hadoop fs -rm -r -skipTrash -r /user/athena/_120*
 
 #how to install BIND
 Rpm -qa | grep bind
