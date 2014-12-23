@@ -1,0 +1,238 @@
+##
+
+> use ProjectLogHistory_Athena;
+switched to db ProjectLogHistory_Athena
+> log1={"TaskID":"MigoCleaner",
+...            "Status":"Success",
+...            "StartTime":"2014-11-16 20:10:58",
+...            "EndTime":"2014-11-16 21:11:00",
+...           "CountInput":"200",
+...            "CountOutput":"200"};
+{
+    "TaskID" : "MigoCleaner",
+    "Status" : "Success",
+    "StartTime" : "2014-11-16 20:10:58",
+    "EndTime" : "2014-11-16 21:11:00",
+    "CountInput" : "200",
+    "CountOutput" : "200"
+}
+> db.ETLHistory.insert(log1);
+WriteResult({ "nInserted" : 1 })
+> db
+ProjectLogHistory_Athena
+> show collections;
+ETLHistory
+system.indexes
+
+> db.ETLHistory.find();
+{ "_id" : ObjectId("5499761021fe0695fe9c291f"), "TaskID" : "MigoCleaner", "Status" : "Success", "StartTime" : "2014-11-16 20:10:58", "EndTime" : "2014-11-16 21:11:00", "CountInput" : "200", "CountOutput" : "200" }
+
+> use ProjectLogHistory_Athena;
+> db.ETLHistory.update({}, {$rename : {"CountInput" : "CountSuccess", "CountOutput" : "CountFailed"}}, false, true);
+
+> db;
+ProjectLogHistory_Athena
+> function addEventTsField(){
+...     db.ETLHistory.find().forEach(function(doc){
+...          db.ETLHistory.update({_id:doc._id}, {$set:{"Src":"clean","Dest":"clean"}});
+...     });
+... };
+> addEventTsField();
+> db.ETLHistory.find();
+{ "_id" : ObjectId("5499761021fe0695fe9c291f"), "TaskID" : "MigoCleaner", "Status" : "Success", "StartTime" : "2014-11-16 20:10:58", "EndTime" : "2014-11-16 21:11:00", "CountSuccess" : "200", "CountFailed" : "200", "Src" : "clean", "Dest" : "clean" }
+{ "_id" : ObjectId("54997c74745af0f38482280a"), "TaskID" : "MigoCleaner", "Status" : "Success", "StartTime" : "2014-11-17 20:10:58", "EndTime" : "2014-11-17 21:11:00", "CountSuccess" : "200", "CountFailed" : "200", "Src" : "clean", "Dest" : "clean" }
+> 
+
+##
+
+> use ProjectLogHistory_Pandora;
+switched to db ProjectLogHistory_Pandora
+> log2={"TaskID":"MigoCleaner",
+...            "Status":"Success",
+...            "StartTime":"2014-11-16 20:10:58",
+...            "EndTime":"2014-11-16 21:11:00",
+...           "IPwho":"10.0.1.18"};
+{
+    "TaskID" : "MigoCleaner",
+    "Status" : "Success",
+    "StartTime" : "2014-11-16 20:10:58",
+    "EndTime" : "2014-11-16 21:11:00",
+    "IPwho" : "10.0.1.18"
+}
+> db.ETLHistory.insert(log2);
+WriteResult({ "nInserted" : 1 })
+> show collections;
+ETLHistory
+system.indexes
+> db.ETLHistory.find();
+{ "_id" : ObjectId("54997675745af0f384822808"), "TaskID" : "MigoCleaner", "Status" : "Success", "StartTime" : "2014-11-16 20:10:58", "EndTime" : "2014-11-16 21:11:00", "IPwho" : "10.0.1.18" }
+
+###
+> use ProjectReport_StarterDIY;
+switched to db ProjectReport_StarterDIY
+> log3={"ShopID":"kgsuparmarket^C001",
+...            "DailyRecords":{"Count":{"N0":"100","E0":"100","S1":"100","S2":"100","S3":"100"
+...                                     ,"LH":"100","LL":"100","LM":"100"
+...                                     ,"RH":"100","RL":"100","RM":"100"
+...                                     ,"FH":"100","FL":"100","FM":"100"
+...                                     ,"MH":"100","ML":"100","MM":"100"},
+...                            "SOAmount":{"N0":"99.99","E0":"99.99","S1":"99.99","S2":"99.99","S3":"99.99"
+...                                     ,"LH":"99.99","LL":"99.99","LM":"99.99"
+...                                     ,"RH":"99.99","RL":"99.99","RM":"99.99"
+...                                     ,"FH":"99.99","FL":"99.99","FM":"99.99"
+...                                     ,"MH":"99.99","ML":"99.99","MM":"99.99"},
+...                            "LastEditDate":"2014-12-12T00:00:00"
+...                            },
+...            "PeriodRecords":{"L7D":{
+...                             "Value":{
+...                             "ValidChangeRate":[1,2,3,4,5],
+...                             "ConversionRate":[1,2,3,4,5],
+...                             "Active":[1,2,3,4,5],
+...                             "WakeUpRate":[1,2,3,4,5],
+...                             "ARPU":[1,2,3,4,5]},
+...                             "LastEditDate":"2014-12-12T00:00:00"
+...                              },
+...     "L30D":{
+...                             "Value":{
+...                             "ValidChangeRate":[1,2,3,4,5],
+...                             "ConversionRate":[1,2,3,4,5],
+...                             "Active":[1,2,3,4,5],
+...                             "WakeUpRate":[1,2,3,4,5],
+...                             "ARPU":[1,2,3,4,5]},
+...                             "LastEditDate":"2014-12-12T00:00:00"}
+...                            },
+...           "GroupInterval":"123.456"};
+{
+    "ShopID" : "kgsuparmarket^C001",
+    "DailyRecords" : {
+        "Count" : {
+            "N0" : "100",
+            "E0" : "100",
+            "S1" : "100",
+            "S2" : "100",
+            "S3" : "100",
+            "LH" : "100",
+            "LL" : "100",
+            "LM" : "100",
+            "RH" : "100",
+            "RL" : "100",
+            "RM" : "100",
+            "FH" : "100",
+            "FL" : "100",
+            "FM" : "100",
+            "MH" : "100",
+            "ML" : "100",
+            "MM" : "100"
+        },
+        "SOAmount" : {
+            "N0" : "99.99",
+            "E0" : "99.99",
+            "S1" : "99.99",
+            "S2" : "99.99",
+            "S3" : "99.99",
+            "LH" : "99.99",
+            "LL" : "99.99",
+            "LM" : "99.99",
+            "RH" : "99.99",
+            "RL" : "99.99",
+            "RM" : "99.99",
+            "FH" : "99.99",
+            "FL" : "99.99",
+            "FM" : "99.99",
+            "MH" : "99.99",
+            "ML" : "99.99",
+            "MM" : "99.99"
+        },
+        "LastEditDate" : "2014-12-12T00:00:00"
+    },
+    "PeriodRecords" : {
+        "L7D" : {
+            "Value" : {
+                "ValidChangeRate" : [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ],
+                "ConversionRate" : [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ],
+                "Active" : [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ],
+                "WakeUpRate" : [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ],
+                "ARPU" : [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ]
+            },
+            "LastEditDate" : "2014-12-12T00:00:00"
+        },
+        "L30D" : {
+            "Value" : {
+                "ValidChangeRate" : [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ],
+                "ConversionRate" : [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ],
+                "Active" : [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ],
+                "WakeUpRate" : [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ],
+                "ARPU" : [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ]
+            },
+            "LastEditDate" : "2014-12-12T00:00:00"
+        }
+    },
+    "GroupInterval" : "123.456"
+}
+> db.DIYReport.insert(log3);
+WriteResult({ "nInserted" : 1 })
+> db.DIYReport.find();
+{ "_id" : ObjectId("54997944745af0f384822809"), "ShopID" : "kgsuparmarket^C001", "DailyRecords" : { "Count" : { "N0" : "100", "E0" : "100", "S1" : "100", "S2" : "100", "S3" : "100", "LH" : "100", "LL" : "100", "LM" : "100", "RH" : "100", "RL" : "100", "RM" : "100", "FH" : "100", "FL" : "100", "FM" : "100", "MH" : "100", "ML" : "100", "MM" : "100" }, "SOAmount" : { "N0" : "99.99", "E0" : "99.99", "S1" : "99.99", "S2" : "99.99", "S3" : "99.99", "LH" : "99.99", "LL" : "99.99", "LM" : "99.99", "RH" : "99.99", "RL" : "99.99", "RM" : "99.99", "FH" : "99.99", "FL" : "99.99", "FM" : "99.99", "MH" : "99.99", "ML" : "99.99", "MM" : "99.99" }, "LastEditDate" : "2014-12-12T00:00:00" }, "PeriodRecords" : { "L7D" : { "Value" : { "ValidChangeRate" : [ 1, 2, 3, 4, 5 ], "ConversionRate" : [ 1, 2, 3, 4, 5 ], "Active" : [ 1, 2, 3, 4, 5 ], "WakeUpRate" : [ 1, 2, 3, 4, 5 ], "ARPU" : [ 1, 2, 3, 4, 5 ] }, "LastEditDate" : "2014-12-12T00:00:00" }, "L30D" : { "Value" : { "ValidChangeRate" : [ 1, 2, 3, 4, 5 ], "ConversionRate" : [ 1, 2, 3, 4, 5 ], "Active" : [ 1, 2, 3, 4, 5 ], "WakeUpRate" : [ 1, 2, 3, 4, 5 ], "ARPU" : [ 1, 2, 3, 4, 5 ] }, "LastEditDate" : "2014-12-12T00:00:00" } }, "GroupInterval" : "123.456" }
+
+
+
