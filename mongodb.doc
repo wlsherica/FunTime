@@ -232,7 +232,51 @@ switched to db ProjectReport_StarterDIY
 > db.DIYReport.insert(log3);
 WriteResult({ "nInserted" : 1 })
 > db.DIYReport.find();
-{ "_id" : ObjectId("54997944745af0f384822809"), "ShopID" : "kgsuparmarket^C001", "DailyRecords" : { "Count" : { "N0" : "100", "E0" : "100", "S1" : "100", "S2" : "100", "S3" : "100", "LH" : "100", "LL" : "100", "LM" : "100", "RH" : "100", "RL" : "100", "RM" : "100", "FH" : "100", "FL" : "100", "FM" : "100", "MH" : "100", "ML" : "100", "MM" : "100" }, "SOAmount" : { "N0" : "99.99", "E0" : "99.99", "S1" : "99.99", "S2" : "99.99", "S3" : "99.99", "LH" : "99.99", "LL" : "99.99", "LM" : "99.99", "RH" : "99.99", "RL" : "99.99", "RM" : "99.99", "FH" : "99.99", "FL" : "99.99", "FM" : "99.99", "MH" : "99.99", "ML" : "99.99", "MM" : "99.99" }, "LastEditDate" : "2014-12-12T00:00:00" }, "PeriodRecords" : { "L7D" : { "Value" : { "ValidChangeRate" : [ 1, 2, 3, 4, 5 ], "ConversionRate" : [ 1, 2, 3, 4, 5 ], "Active" : [ 1, 2, 3, 4, 5 ], "WakeUpRate" : [ 1, 2, 3, 4, 5 ], "ARPU" : [ 1, 2, 3, 4, 5 ] }, "LastEditDate" : "2014-12-12T00:00:00" }, "L30D" : { "Value" : { "ValidChangeRate" : [ 1, 2, 3, 4, 5 ], "ConversionRate" : [ 1, 2, 3, 4, 5 ], "Active" : [ 1, 2, 3, 4, 5 ], "WakeUpRate" : [ 1, 2, 3, 4, 5 ], "ARPU" : [ 1, 2, 3, 4, 5 ] }, "LastEditDate" : "2014-12-12T00:00:00" } }, "GroupInterval" : "123.456" }
+{le, 0=Female
+Tagging format = int
+Gender format = int 
+
+> use ProjectCustomerInfo;
+switched to db ProjectCustomerInfo
+> log4={"ShopID":"pxmarket_neihu",
+...            "MemberID":"0012345678",
+...            "UID":"A123456789",
+...            "Gender":0,
+...            "Birthday":"2014-12-25",
+...            "Location":"Taiwan", 
+...            "Wechat":"TaiwanBest",
+...            "Email":"TaiwanBest@migocorp.com",
+...            "CellPhone":"886912112345",
+...            "DailyTagging":[{"TaggingDate":"2014-12-25","Tagging":1}]
+...       }
+{
+    "ShopID" : "pxmarket_neihu",
+    "MemberID" : "0012345678",
+    "UID" : "A123456789",
+    "Gender" : 0,
+    "Birthday" : "2014-12-25",
+    "Location" : "Taiwan",
+    "Wechat" : "TaiwanBest",
+    "Email" : "TaiwanBest@migocorp.com",
+    "CellPhone" : "886912112345",
+    "DailyTagging" : [
+        {
+            "TaggingDate" : "2014-12-25",
+            "Tagging" : 1
+        }
+    ]
+}
+> db.Info.insert(log4);
+WriteResult({ "nInserted" : 1 })
+
+> db.Info.find()
+{ "_id" : ObjectId("54999494745af0f38482280b"), "ShopID" : "pxmarket_neihu", "MemberID" : "0012345678", "UID" : "A123456789", "Gender" : 0, "Birthday" : "2014-12-25", "Location" : "Taiwan", "Wechat" : "TaiwanBest", "Email" : "TaiwanBest@migocorp.com", "CellPhone" : "886912112345", "DailyTagging" : [ { "TaggingDate" : "2014-12-25", "Tagging" : 1 } ] }
+
+> db.Info.update( {"ShopID":"pxmarket_neihu","MemberID":"0012345678"}, {"$push" : {"DailyTagging" : {"TaggingDate":"2014-12-26","Tagging":2}}} )
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+> db.Info.find();
+{ "_id" : ObjectId("54999494745af0f38482280b"), "ShopID" : "pxmarket_neihu", "MemberID" : "0012345678", "UID" : "A123456789", "Gender" : 0, "Birthday" : "2014-12-25", "Location" : "Taiwan", "Wechat" : "TaiwanBest", "Email" : "TaiwanBest@migocorp.com", "CellPhone" : "886912112345", "DailyTagging" : [ { "TaggingDate" : "2014-12-25", "Tagging" : 1 }, { "TaggingDate" : "2014-12-26", "Tagging" : 2 } ] } "_id" : ObjectId("54997944745af0f384822809"), "ShopID" : "kgsuparmarket^C001", "DailyRecords" : { "Count" : { "N0" : "100", "E0" : "100", "S1" : "100", "S2" : "100", "S3" : "100", "LH" : "100", "LL" : "100", "LM" : "100", "RH" : "100", "RL" : "100", "RM" : "100", "FH" : "100", "FL" : "100", "FM" : "100", "MH" : "100", "ML" : "100", "MM" : "100" }, "SOAmount" : { "N0" : "99.99", "E0" : "99.99", "S1" : "99.99", "S2" : "99.99", "S3" : "99.99", "LH" : "99.99", "LL" : "99.99", "LM" : "99.99", "RH" : "99.99", "RL" : "99.99", "RM" : "99.99", "FH" : "99.99", "FL" : "99.99", "FM" : "99.99", "MH" : "99.99", "ML" : "99.99", "MM" : "99.99" }, "LastEditDate" : "2014-12-12T00:00:00" }, "PeriodRecords" : { "L7D" : { "Value" : { "ValidChangeRate" : [ 1, 2, 3, 4, 5 ], "ConversionRate" : [ 1, 2, 3, 4, 5 ], "Active" : [ 1, 2, 3, 4, 5 ], "WakeUpRate" : [ 1, 2, 3, 4, 5 ], "ARPU" : [ 1, 2, 3, 4, 5 ] }, "LastEditDate" : "2014-12-12T00:00:00" }, "L30D" : { "Value" : { "ValidChangeRate" : [ 1, 2, 3, 4, 5 ], "ConversionRate" : [ 1, 2, 3, 4, 5 ], "Active" : [ 1, 2, 3, 4, 5 ], "WakeUpRate" : [ 1, 2, 3, 4, 5 ], "ARPU" : [ 1, 2, 3, 4, 5 ] }, "LastEditDate" : "2014-12-12T00:00:00" } }, "GroupInterval" : "123.456" }
 
 
 
