@@ -1,0 +1,21 @@
+# Erica Li 20150114
+
+#How to install docker on mac
+#step1. download Boot2Docker, execute it, next next then next
+#step2. then...
+ls /usr/local/bin
+boot2docker help
+VBoxManage list vms
+boot2docker init
+boot2docker upgrade
+boot2docker start
+boot2docker ssh
+
+#How to install apache spark on docker
+#in docker
+#Pull the image from Docker Repository
+docker pull sequenceiq/spark:1.2.0
+#Running the image
+docker run -i -t -h sandbox sequenceiq/spark:1.2.0 /etc/bootstrap.sh -bash
+
+#Done!
