@@ -1,0 +1,74 @@
+apache hadoop
+HDFS
+分散儲存
+master slaves
+name node:目錄檔案架構
+data node:資料儲存
+2nd name node:替補name node,非即時備援
+fsimage是存在MEM, snapshot
+每小時檢查name node backup&edits log
+再合併成fsimage
+最好分開存放
+規格最好一樣
+
+Namenode會單點毀損
+所以改作HA, yarn架構, 可取代原本namenode
+
+journal log做backup,HA最好有三到五台,花錢
+設定內就有,config,無法跟datanode放一起
+
+namenode不會有資料,可多台namenode,但2nd都要配給
+多台namenode就是貴
+HA有standby namenode,可用zookeeper直接啟動備援
+
+HDFS如何溝通
+client負責下指令,namenode協調分配工作+daemon
+先跟namenode問要寫入哪幾台
+問到後寫入datanode,A pass B, pass C... done
+最後告訴namenode結束
+如果datanode其中一個壞掉,不管先往下寫入,最後回報某點壞掉
+namenode會再指派其他台寫入
+
+namenode只有mata data
+datanode有data
+HDFS只是虛擬系統,預設blocksize=64MB各台大小都一樣
+
+hadoop做straming access串留存取,本地計算
+VM效能很差,屬網路集中化
+
+
+MAPREDUCE v1
+分散運算
+jobtracker做master, tasktracker是slaves
+
+YARN:mr v2
+因為v1容錯性低,資源無法共享,無法支援多個計算框架
+而且延展性差,jobtracker需要同時做資料管理跟系統監控
+yarn資源利用率高,light等級,整合不同計算框架
+1)resource manager取代job tracker
+2)application manager
+3)node manager
+4)container:將mem cpu抽象化
+YARN工作流程
+client找RM, RM分派給NM, NM起AM作業控制
+RM會直接關注AM, AM會拿到containers
+程序會透過NM啟動maptask/reducetask
+AM會RM在工作完成後註銷
+AM會再有工作做時才出現,不是長久存在
+mapreducetask也會因為結束而消失
+
+yarn架構是resource pool
+透過不同container做不同的task
+
+hadoop硬體需求
+主節點10k-20k(USD)
+7200rpm
+4*1TB better than 2*2TB
+配置要相同,一個節點配置最多32TB
+超過會因為大量資料複製而變慢
+網路20% 1GB
+要監控disk ram cpu
+小型POC可用EMR取代
+
+JDK1.8 
+
