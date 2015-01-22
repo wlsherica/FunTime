@@ -1,3 +1,7 @@
+
+#SPARK CN 
+http://edu.51cto.com/course/course_id-1659.html
+
 cd spark-1.0.2-bin-hadoop2
 ./bin/spark-shell
 
