@@ -1,5 +1,4 @@
 import sys
-sys.path.append("/data/migo/athena/lib")
 
 from datetime import datetime, timedelta
 from athena_variable import *
