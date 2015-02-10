@@ -1,0 +1,56 @@
+#20150210 hadoop streaming note
+Spark 1.1
+Prezi 高流量下網站入侵偵測
+MRTG圖 看高峰
+CACTI圖 好處是透過SMTP看細部資訊 可以訂秒數看即時流量
+NAGIOS圖
+這些圖都有一個問題 監控流量太大撐不住 
+為了要看到IP 看到細節 改用SPARK做資訊撈取
+
+web -> flume collector ->  flume hdfs sink -> storage(hadoop hive pig)
+即時的放ES, 歷史的在hadoop(批次用)
+kibana是做報表
+
+version2
+nginx for web
+kafka取代flume, web直接丟到kafka
+  flume:source, sinks, channel settings
+hadoop: namenode ha費工
+zookeeper: ha在zookeeper上run
+mesos: 資源調度
+spark streaming: 即時串流 處理時間序 東西進來會切小片 再轉RDD
+kibana: 報表
+
+Twitter/ZeroMQ/HDFS/Kafka/Flume-> Spark streaming -> dB, HDFS, dashboard
+
+Flume問題: 一定要跟資料綁再一起, 資料壞掉就一起crash
+kafka: 有中控, 再把資料配出去
+  producer(front end, service), broker(kafka), consumers (hadoop, security, data warehouse..)
+  kafka是存在硬碟, 是sequence硬碟(partition, 是他快速的原因), 不會比random memory慢
+  consumer group, 資料會丟到zookeeper存metadata
+
+sbt:10.1.0版, 版本要相容, 不同版本會有差
+主要結構
+src/
+  main/
+    resources/
+    scala/
+    java/
+...
+起一個project, build sbt是重點
+
+官網要讀....
+plugin做打包, 只會打包目前擁有的
+所以要透過plugin來打包, addSbtPlugin
+
+regex tools
+    expresso (.net)
+geo library (c, 速度快)
+    把IP轉成需要的地理位置資訊
+    maxmind
+    qqwry
+    iplocation
+connection
+
+
+
