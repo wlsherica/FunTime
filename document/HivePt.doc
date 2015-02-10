@@ -1,0 +1,44 @@
+
+select shopid,
+       from_unixtime(unix_timestamp(),'yyyyMMdd')
+from daily_total_hive
+limit 2;
+
+CREATE EXTERNAL TABLE test (
+    shopid string,
+    score float
+)  
+PARTITIONED BY (datekey string)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '\t'
+LOCATION '/user/erica_li/hivetest';
+
+show partitions test;
+
+alter table test
+add partition (datekey='20141212')
+location '/user/erica_li/hivetest'
+;
+
+insert overwrite table test
+partition (datekey='20141214')
+select shopid,
+       stickiness
+from daily_total_hive limit 3
+;
+
+set hive.exec.dynamic.partition=true;                                                            
+set hive.exec.dynamic.partition.mode=nostrick;
+
+insert overwrite table test
+partition (datekey)
+select shopid,
+       stickiness,
+       from_unixtime(unix_timestamp(),'yyyyMMdd') as datekey
+from daily_total_hive limit 3
+;
+
+hadoop fs -ls /user/erica_li/hivetest/datekey=20141213
+
+
+

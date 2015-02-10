@@ -1,0 +1,80 @@
+myword='廢物'
+myword2=u'廢物'
+gg='\\u76f4\\u71df'
+
+廢物的unicode對象就是u'\u5ee2\u7269'
+而字串是一個字元數組, 表示對unicode的編碼(可以是utf8, big5等)後存的格式
+只是一個字串沒有特殊意義, 如果要針對這無意思字串轉成正確編碼格式,要做其他調整
+
+myword2.encode('utf-8')
+'\xe5\xbb\xa2\xe7\x89\xa9'
+
+my3 = myword2.encode('utf-8')
+my3
+'\xe5\xbb\xa2\xe7\x89\xa9'
+
+print my3
+廢物
+
+.decode('unicode_escape')
+
+print myword
+廢物
+
+myword
+'\xe5\xbb\xa2\xe7\x89\xa9'
+
+myword2
+u'\u5ee2\u7269'
+
+print myword2
+廢物
+
+print gg
+\u76f4\u71df
+
+gg
+'\\u76f4\\u71df'
+gg.decode('unicode_escape')
+u'\u76f4\u71df'
+
+print gg.decode('unicode_escape')                         
+直營
+
+unicode_escape: Produce a string that is suitable as Unicode literal in Python source code
+
+string_escape: Produce a string that is suitable as string literal in Python source code
+
+s="this isn't a \"very\" good example!"
+
+'this isn\'t a "very" good example!'
+
+print s
+'this isn\\\'t a "very" good example!'
+
+print s.encode('string_escape')
+this isn\'t a "very" good example!
+
+print s.encode('string_escape').decode('string_escape')
+this isn't a "very" good example!
+
+
+#py支援unicode
+#print時會用sys.stdout.encoding做編碼
+
+編碼: unicode->string 用encode()
+解碼: string->unicode 用decode()
+
+python用ascii編碼,中文會出錯, 因此無法print出string
+可在script內加註#coding=utf-8
+
+string.encode()=str.decode(sys.defaultencoding).encode()
+sys.defaultencoding是ascii無法辨識中文
+ps. python3.X以上無string_escape, str只存unicode
+
+'\\u76f4\\u71df'
+u'\u76f4\u71df'
+
+
+
+

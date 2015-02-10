@@ -1,0 +1,5 @@
+#makefile on linux 
+./configure 
+make
+make install
+

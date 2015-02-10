@@ -1,0 +1,17 @@
+wget https://dl.bintray.com/sbt/native-packages/sbt/0.13.6/sbt-0.13.6.tgz
+mkdir /opt/scala/sbt
+tar zxvf sbt-0.13.6.tgz -C /opt/scala/
+cd /opt/scala/sbt/
+vim sbt
+
+BT_OPTS="-Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M"
+java $SBT_OPTS -jar /opt/scala/sbt/bin/sbt-launch.jar "$@" 
+
+chmod u+x sbt 
+
+vim ~/.bashrc
+export PATH=/opt/scala/sbt/:$PATH
+
+source ~/.bashrc
+
+sbt sbt-version

@@ -1,0 +1,18 @@
+#how to append HDFS files?
+#you need to turn on the dfs.support.append from setting
+
+#Please check your hadoop_home first
+alternatives --display hadoop-conf
+
+#Please check your hadoop version
+hadoop version
+
+#Added this property in hdfs-site.xml on namenode
+<property>
+    <name>dfs.support.append</name>
+    <value>true</value>
+</property>
+
+#or you could do this on cloudera manager UI
+[Clusters]->[Services] HDFS->[Category]->[Service-Wide]->[Advanced]->[Cluster-wide Advanced Configuration Snippet (Safety Valve) for core-site.xml]->set your value->[Save changes]->[Actions]->[Deploy ....]
+
