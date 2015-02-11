@@ -1,0 +1,37 @@
+#how to install scala in Centos?
+
+[root@cdh4-dn2 tmp]# wget http://downloads.typesafe.com/scala/2.11.5/scala-2.11.5.tgz
+–2015-02-11 10:27:08– http://downloads.typesafe.com/scala/2.11.5/scala-2.11.5.tgz
+Resolving downloads.typesafe.com… 54.239.176.243, 54.192.215.116, 54.192.215.111, …
+Connecting to downloads.typesafe.com|54.239.176.243|:80… connected.
+HTTP request sent, awaiting response… 200 OK
+Length: 27135212 (26M) [application/octet-stream]
+Saving to: “scala-2.11.5.tgz”
+
+100%[==================================================================================================================================>] 27,135,212 3.99M/s in 6.3s
+
+2015-02-11 10:27:14 (4.13 MB/s) – “scala-2.11.5.tgz” saved [27135212/27135212]
+
+[root@cdh4-dn2 tmp]# tar zxf scala-2.11.5.tgz
+
+[root@cdh4-dn2 tmp]# mv scala-2.11.5 /usr/share/scala
+[root@cdh4-dn2 tmp]# cd /usr/share/scala
+
+[root@cdh4-dn2 scala]# sudo ln -s /usr/share/scala/bin/scala /usr/bin/scala
+[root@cdh4-dn2 scala]# sudo ln -s /usr/share/scala/bin/scalac /usr/bin/scalac
+[root@cdh4-dn2 scala]# sudo ln -s /usr/share/scala/bin/fsc /usr/bin/fsc
+[root@cdh4-dn2 scala]# sudo ln -s /usr/share/scala/bin/sbaz /usr/bin/sbaz
+[root@cdh4-dn2 scala]# sudo ln -s /usr/share/scala/bin/sbaz-setup /usr/bin/sbaz-setup
+[root@cdh4-dn2 scala]# sudo ln -s /usr/share/scala/bin/scaladoc /usr/bin/scaladoc
+[root@cdh4-dn2 scala]# sudo ln -s /usr/share/scala/bin/scalap /usr/bin/scalap
+[root@cdh4-dn2 scala]# scala
+Welcome to Scala version 2.11.5 (Java HotSpot(TM) 64-Bit Server VM, Java 1.6.0_31).
+Type in expressions to have them evaluated.
+Type :help for more information.
+
+scala> 1+1
+res0: Int = 2
+
+scala>
+
+
