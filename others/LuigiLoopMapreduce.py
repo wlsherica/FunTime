@@ -19,9 +19,12 @@ class LRFM(MigoLuigiHdfs):
     Author:       Erica L Li
     Created Date: 2015.02.12
     Source:       /user/erica_li/market/trans20.dat
-    Destination:  /user/erica_li/market/report
-    Usage:        python lrfm_beta.py LRFM --use-hadoop --src /user/erica_li/market/trans20.dat --dest /user/erica_li/market/lrfm_0212
-    Attributes:   
+                  shop_id, member_id, ordate, amount
+    Destination:  /user/erica_li/market/lrfm_0212 
+                  date_tag, shop_id, member_id, L, R, F, M
+    Usage:        python lrfm_beta.py LRFM --use-hadoop --src /user/erica_li/market/trans20.dat --dest /user/erica_li/market/lrfm_0212 --cal-date 20140202 --start-dt 20140129 --end-dt 20140202
+    Attributes:   you needed added startdate and enddate for LRFM result
+                  you needed convert tuple to list in reducer()
     '''
     start_dt = luigi.Parameter(default=datetime.today().strftime("%Y%m%d")) 
     end_dt = luigi.Parameter(default=datetime.today().strftime("%Y%m%d"))
@@ -40,23 +43,6 @@ class LRFM(MigoLuigiHdfs):
 
     def reducer(self, key, values):
 
-
-#        dt_min = None
-#        dt_max = None
-
-#        for val in values:
-#            ordate, amount = val.split(MIGO_TMP_SEPARATOR)
-#            order_date = datetime.strptime(ordate, "%Y-%m-%dT00:00:00")
-
-#            if dt_min == None:
-#                dt_min = dt_max = order_date
-#            elif order_date < dt_min:
-#               dt_min = order_date
-#            elif order_date > dt_max:
-#                dt_max = order_date
-
-#        yield "{}_{}".format(dt_min, dt_max),
-
         start = datetime.strptime(self.start_dt, "%Y%m%d")
         end = datetime.strptime(self.end_dt, "%Y%m%d")
         diff = end-start
@@ -64,7 +50,6 @@ class LRFM(MigoLuigiHdfs):
 
         for i in range(diff.days + 1):
             now_dt = start + td(days=i)
-            #print datetime.strftime(now_dt, "%Y-%m-%dT00:00:00")
 
             day_min = datetime.max
             day_max = datetime.min
@@ -98,7 +83,7 @@ class LRFM(MigoLuigiHdfs):
                 output_r = (now_dt - day_max).days
         
                 if order_m > 0:
-                    yield now_dt, shop_id, member_id, output_l, output_r, order_f, order_m
+                    yield datetime.strftime(now_dt, "%Y%m%d"), shop_id, member_id, output_l, output_r, order_f, order_m
             except ValueError as e:
                 yield "%s: %s - %s" %(MIGO_STAMP_FOR_ERROR_RECORD, key, e),
 
