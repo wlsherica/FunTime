@@ -63,9 +63,9 @@ class Mu2Interval(MigoLuigiHdfs):
         self.init_reducer()
 
         mydict = {}
-        for i in range(diff.days + 1):
-            now_dt = start + td(days=i)
-            mydict[now_dt] = [0, 0, 0]    
+#        for i in range(diff.days + 1):
+#            now_dt = start + td(days=i)
+#            mydict[now_dt] = [None, 0, 0, 0]    
 
         def output(shop_id, tX2, tBarx, n, getdate):
             line = None
@@ -89,6 +89,9 @@ class Mu2Interval(MigoLuigiHdfs):
 
                 sodate = datetime.strptime(ordate, "%Y-%m-%dT00:00:00")
 
+                if pre_shop_id == None:
+                    mydict[ordate] = [x2, barx, num]
+                    print >> stdout, "First Line ---", mydict
 
                 if pre_shop_id != None and pre_member_id != None:
                     if pre_member_id == member_id:
@@ -100,14 +103,14 @@ class Mu2Interval(MigoLuigiHdfs):
                         barx += interval
                         num += 1
 
-                        for k, v in mydict.items():
-                            if k <= today :
-                                mydict[k] = [x2, barx, num]
+#                        for k, v in mydict.items():
+#                            if k <= today :
+                        mydict[ordate] = [x2, barx, num]
                                 #print >> stdout, today, "---", x2, barx, num
 
                     if pre_shop_id != shop_id:
                         #output(pre_shop_id, x2, barx, num, getdate)
-
+                        print >> stdout, "#### DICT change shop### ", mydict 
                         num, x2, barx = 1, 0, 0
 
                 pre_shop_id = shop_id
@@ -121,7 +124,15 @@ class Mu2Interval(MigoLuigiHdfs):
 
 #            output(pre_shop_id, x2, barx, num, getdate)
 
-        print >> stdout, "#### DICT ### ", mydict
+#        for i in range(diff.days + 1):
+#            now_dt = start + td(days=i)            
+#            if now_dt datetime.strptime(ordate, "%Y-%m-%dT00:00:00"):
+
+#        for k, v in mydict.items():
+#            if k <= datetime.strptime(pre_ordate, "%Y-%m-%dT00:00:00") :
+#                mydict[k] = [pre_shop_id, x2, barx, num]
+
+        print >> stdout, "last #### DICT ### ", mydict
         self.end_reducer()
 
     def reducer(self, key, values):
