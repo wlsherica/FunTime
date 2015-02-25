@@ -11,7 +11,6 @@ from athena_math import *
 import math
 import numpy as np
 
-#import datetime
 from datetime import datetime
 from datetime import date, timedelta as td
 
@@ -25,10 +24,10 @@ class Mu2Interval(MigoLuigiHdfs):
     Created Date: 2015.02.13
     Source:       /user/erica_li/market/trans20.dat
                   <shop_id> <member_id> <order date> <money>
-    Destination:  /user/erica_li/market/mu2_0212
-                  <shop_id> <sum(interval**2)> <sum over all intervals> <number of intervals>
-    Usage:        python 
-    Attributes:   
+    Destination:  /user/erica_li/market/lrfm_0212
+                  <cal_date> <shop_id> <mean> <sd>
+    Usage:        python mu2interval.py Mu2Interval --use-hadoop --src /user/erica_li/market/trans2shop.dat --dest /user/erica_li/market/lrfm_0212 --cal-date 20140202 --start-dt 20140129 --end-dt 20140202
+    Attributes:
     '''
     sep = luigi.Parameter(default=MIGO_MR_REPLACE_FOR_TAB)
 
@@ -41,12 +40,9 @@ class Mu2Interval(MigoLuigiHdfs):
     def mapper(self, line):
         try:
             shop_id, member_id, ordate, money = line.split(MIGO_SEPARATOR_LEVEL1)
-
-            #now = datetime.datetime.strptime(self.cal_date, "%Y%m%d")
             order_date = datetime.strptime(ordate, "%Y-%m-%dT00:00:00")
 
             if order_date <= datetime.strptime(self.cal_date, "%Y%m%d"):
-            #if datetime.datetime.strptime(ordate, "%Y-%m-%dT%H:%M:%S") <= now:
                 yield "{shop_id}{partition_sep}{member_id}{sep}{ordate}".format(shop_id=shop_id, partition_sep=self.sep, member_id=member_id, sep=MIGO_TMP_SEPARATOR, ordate=ordate), "{}_{}".format(member_id, ordate)
                 self.count_success += 1
         except Exception as e:
@@ -63,15 +59,17 @@ class Mu2Interval(MigoLuigiHdfs):
         self.init_reducer()
 
         mydict = {}
-#        for i in range(diff.days + 1):
-#            now_dt = start + td(days=i)
-#            mydict[now_dt] = [None, 0, 0, 0]    
+
+        pre_vl = [-999, -999, -999, -999]
 
         def output(shop_id, tX2, tBarx, n, getdate):
             line = None
             if n > 1:
                 mean = float(tBarx)/(n-1)
                 line = "{}\t{}\t{}\t{}".format(getdate, shop_id, mean, math.sqrt(float(tX2)/(n-1) - math.pow(mean, 2)))
+                print >> stdout, line
+            elif n == -999:
+                line = "{}\t{}\t{}\t{}".format(getdate, shop_id, -999, -999)
                 print >> stdout, line
             else:
                 self.count_fail += 1
@@ -90,8 +88,7 @@ class Mu2Interval(MigoLuigiHdfs):
                 sodate = datetime.strptime(ordate, "%Y-%m-%dT00:00:00")
 
                 if pre_shop_id == None:
-                    mydict[ordate] = [x2, barx, num]
-                    print >> stdout, "First Line ---", mydict
+                    mydict[ordate] = [shop_id, -999, -999, -999]
 
                 if pre_shop_id != None and pre_member_id != None:
                     if pre_member_id == member_id:
@@ -103,36 +100,40 @@ class Mu2Interval(MigoLuigiHdfs):
                         barx += interval
                         num += 1
 
-#                        for k, v in mydict.items():
-#                            if k <= today :
-                        mydict[ordate] = [x2, barx, num]
-                                #print >> stdout, today, "---", x2, barx, num
-
+                        mydict[ordate] = [pre_shop_id, x2, barx, num]
+                        
                     if pre_shop_id != shop_id:
-                        #output(pre_shop_id, x2, barx, num, getdate)
-                        print >> stdout, "#### DICT change shop### ", mydict 
+                        for i in range(diff.days + 1):
+                            now_dt = start + td(days=i)
+                            key_dt = datetime.strftime(now_dt, "%Y-%m-%dT00:00:00")
+                            if key_dt in mydict.keys():
+                                shop, x2, barx, num = [val for val in mydict[key_dt]]
+                                pre_vl = mydict[key_dt]
+                            else:
+                                shop, x2, barx, num = pre_vl
+                            output(shop, x2, barx, num, key_dt)
+
                         num, x2, barx = 1, 0, 0
 
                 pre_shop_id = shop_id
                 pre_member_id = member_id
                 pre_ordate = ordate
 
-                self.count_success += 1
-                    
+                self.count_success += 1 
             except ValueError as e:
                 self.count_fail += 1
 
-#            output(pre_shop_id, x2, barx, num, getdate)
+#        pre_vl = [-999, -999, -999, -999]
+        for i in range(diff.days + 1):
+            now_dt = start + td(days=i) 
+            key_dt = datetime.strftime(now_dt, "%Y-%m-%dT00:00:00")
+            if key_dt in mydict.keys():
+                shop, x2, barx, num = [val for val in mydict[key_dt]]
+                pre_vl = mydict[key_dt]
+            else:
+                shop, x2, barx, num = pre_vl
+            output(shop, x2, barx, num, key_dt) 
 
-#        for i in range(diff.days + 1):
-#            now_dt = start + td(days=i)            
-#            if now_dt datetime.strptime(ordate, "%Y-%m-%dT00:00:00"):
-
-#        for k, v in mydict.items():
-#            if k <= datetime.strptime(pre_ordate, "%Y-%m-%dT00:00:00") :
-#                mydict[k] = [pre_shop_id, x2, barx, num]
-
-        print >> stdout, "last #### DICT ### ", mydict
         self.end_reducer()
 
     def reducer(self, key, values):
