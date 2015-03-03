@@ -1,0 +1,101 @@
+#MLlib note
+二元分類 資料格式 基礎統計 模型
+local vector: 儲存在單一機器 支持dense vector和sparse vector
+兩種寫出vector的方式
+
+labeled points
+一個本地向量都會和一個標記相關
+用在監督學習 有Y,也要先import進來
+可以讀取libsvm格式 有範例
+
+local matrix
+distributed matrix
+有三種實際操作 row, indexedrow, coordinate matrix
+rowindex一個面向行的分布矩陣 透過一個RDD來表示所有的行 每一行都是一個本地向量
+
+indexedrow matrix
+行索引有特殊意義 每一行都是由一個本地向量跟長整數索引組成
+
+座標矩陣entry: i:long, j:Long value:double
+i表示行索引 j是列索引 value是值
+只有當行列很大而且矩陣很稀疏才會用
+https://spark.apache.org/docs/latest/mllib-guide.html
+
+概述統計量
+from pyspark.mllib.stat import Statistics
+
+sc = ... # SparkContext
+
+mat = ... # an RDD of Vectors
+
+# Compute column summary statistics.
+# summary = Statistics.colStats(mat)
+# print summary.mean()
+# print summary.variance()
+# print summary.numNonzeros()
+
+相關係數目前支援spearman and pearson
+輸入兩個RDD就可以輸出一個corr係數
+
+from pyspark.mllib.stat import Statistics
+
+sc = ... # SparkContext
+
+seriesX = ... # a series
+seriesY = ... # must have the same number of partitions and cardinality as seriesX
+
+# Compute the correlation using Pearson's method. Enter "spearman" for Spearman's method. If a 
+# # method is not specified, Pearson's method will be used by default. 
+# print Statistics.corr(seriesX, seriesY, method="pearson")
+#
+# data = ... # an RDD of Vectors
+# # calculate the correlation matrix using Pearson's method. Use "spearman" for Spearman's method.
+# # If a method is not specified, Pearson's method will be used by default. 
+# print Statistics.corr(data, method="pearson")
+#
+
+分層抽樣
+可以針對sampleByKey來做抽樣,python目前只有支援這個
+scala另外有支援sampleByKeyExact() 這個功能可以準確取出使用者指定的抽樣大小
+
+sc = ... # SparkContext
+
+data = ... # an RDD of any key value pairs
+fractions = ... # specify the exact fraction desired from each key as a dictionary
+
+approxSample = data.sampleByKey(False, fractions);
+
+假設檢定
+目前有pearson chi-square test
+
+隨機資料生成
+隨機生成rdd double or rdd vector
+根據你給的分布例如poisson uniform standard normal等分布去產生
+
+from pyspark.mllib.random import RandomRDDs
+
+sc = ... # SparkContext
+
+# Generate a random double RDD that contains 1 million i.i.d. values drawn from the
+# # standard normal distribution `N(0, 1)`, evenly distributed in 10 partitions.
+# u = RandomRDDs.uniformRDD(sc, 1000000L, 10)
+# # Apply a transform to get a random double RDD following `N(1, 4)`.
+# v = u.map(lambda x: 1.0 + 2.0 * x)
+
+Logistic regression
+二元分類
+odds ratio
+為何要取log? 曲線凹成直線就可以做回歸了
+
+SVM
+找出最佳平面
+support vector, 最大margin可以撐起那個邊界
+通常第一個要決定kernel type
+最常用的是RBF kernel, 你可以做出任意曲線
+RBF=-1通常就很好 否則容易overfitting(要避免)
+還可以決定錯誤容忍率 cost function
+只能用嘗試去決定參數要下多少
+e.g.有n=100, 找出80來training, 20來測試
+1/5數量是常用數字, 反覆抽取測試也可以cross classification
+
+
