@@ -56,15 +56,13 @@ class IndividualInterval(MigoLuigiHdfs):
         self.init_hadoop()
         self.init_reducer()
 
-        def output(tmp_dict):
+        def output(shop_id, getdate, member_id, min_dt, max_dt, v):
             line = None
-            for k, v in tmp_dict.items():
-                shop_id, getdate, member_id, min_dt = k.split("_")
-                if v != -999:
-                    line = "{}\t{}\t{}\t{}\t{}\t{}\t{}".format(getdate, shop_id, member_id, np.mean(v), len(v), min_dt, getdate)
-                else:
-                    line = "{}\t{}\t{}\t{}\t{}\t{}\t{}".format(getdate, shop_id, member_id, v, v, min_dt, getdate)
-                print >> stdout, line
+            if v:
+                line = "{}\t{}\t{}\t{}\t{}\t{}\t{}".format(getdate, shop_id, member_id, np.mean(v), len(v), min_dt, max_dt)
+            else:
+                line = "{}\t{}\t{}\t{}\t{}\t{}\t{}".format(getdate, shop_id, member_id, -999, -999, min_dt, max_dt)
+            print >> stdout, line
 
         mydict = {}
 
@@ -84,7 +82,8 @@ class IndividualInterval(MigoLuigiHdfs):
 
                 if pre_member_id == None:
                     pre_min_date = ordate
-                    mydict[shop_id+"_"+ordate+"_"+member_id+"_"+ordate] = -999
+                    #print >> stdout, "FIRST LINE:", shop_id+"_"+ordate+"_"+member_id+"_"+ordate+"_"+ordate, []
+                    output(shop_id, ordate, member_id, ordate, ordate, [])
 
                 if pre_shop_id != None and pre_member_id != None:
                     if pre_member_id == member_id:
@@ -93,24 +92,31 @@ class IndividualInterval(MigoLuigiHdfs):
                         interval = (today - yesterday).days
 
                         if interval > 1:
-                            for i in range(1, diff.days):
+                            for i in range(1, interval):
                                 lost_dt = yesterday + td(days=i) 
                                 lost_str_dt = datetime.strftime(lost_dt, "%Y-%m-%dT00:00:00")
-                                if itvl[:]:
-                                    mydict[shop_id+"_"+lost_str_dt+"_"+member_id+"_"+pre_min_date] = itvl[:]
+                                #print >> stdout, "2ND LINE:", shop_id+"_"+lost_str_dt+"_"+member_id+"_"+pre_min_date+"_"+pre_ordate, str(itvl[:])
+                                output(shop_id, lost_str_dt, member_id, pre_min_date, pre_ordate, itvl[:])
 
                         itvl.append(interval)
-                        mydict[shop_id+"_"+ordate+"_"+member_id+"_"+pre_min_date] = itvl[:]
+                        #print >> stdout, "3RD LINE:", shop_id+"_"+ordate+"_"+member_id+"_"+pre_min_date+"_"+ordate, str(itvl[:])
+                        output(shop_id, ordate, member_id, pre_min_date, ordate, itvl[:])
 
                     if pre_member_id != member_id:
-#                        if len(itvl):
-#                            print >> stdout, pre_shop_id, pre_member_id, np.mean(itvl), len(itvl), pre_min_date, pre_ordate
-#                        else:
-#                            print >> stdout, pre_shop_id, pre_member_id, -999, -999, pre_min_date, pre_ordate
+                        pre_ordate_dt = datetime.strptime(pre_ordate, "%Y-%m-%dT00:00:00")
+                        if pre_ordate_dt < end:
+                            diff2 = end - pre_ordate_dt
+                            for j in range(1, diff2.days+1):
+                                supp_dt = pre_ordate_dt + td(days=j)
+                                supp_str_dt = datetime.strftime(supp_dt, "%Y-%m-%dT00:00:00")
+                                #print >> stdout, "4TH LINE:", shop_id+"_"+supp_str_dt+"_"+pre_member_id+"_"+pre_min_date+"_"+pre_ordate, str(itvl[:])
+                                output(shop_id, supp_str_dt, pre_member_id, pre_min_date, pre_ordate, itvl[:])
+
                         itvl = []
                         pre_min_date = ordate
 
-                        mydict[shop_id+"_"+ordate+"_"+member_id+"_"+pre_min_date] = -999
+                        #print >> stdout, "LAST LINE:", shop_id+"_"+ordate+"_"+member_id+"_"+pre_min_date+"_"+pre_min_date, []
+                        output(shop_id, ordate, member_id, pre_min_date, pre_min_date, [])
 
                 pre_shop_id = shop_id
                 pre_member_id = member_id
@@ -121,17 +127,10 @@ class IndividualInterval(MigoLuigiHdfs):
             except ValueError as e:
                 self.count_fail += 1
 
-#        print >> stdout, pre_shop_id, pre_member_id, np.mean(itvl), len(itvl), pre_min_date, pre_ordate
-        output(mydict)
         self.end_reducer()
 
     def reducer(self, key, values):
         pass
-
-'''
-                yield "{}\t{}\t{}\t{}\t{}".format(key.replace("_", MIGO_SEPARATOR_LEVEL1), np.mean(interval), len(interval), sorted_values[0], sorted_values[-1]),
-                yield "{}\t{}\t{}\t{}\t{}".format(key.replace("_", MIGO_SEPARATOR_LEVEL1), MIGO_ERROR_NUMBER, MIGO_ERROR_NUMBER, sorted_values[0], sorted_values[-1]),
-'''
 
 if __name__ == "__main__": 
     luigi.run()
