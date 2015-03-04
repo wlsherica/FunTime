@@ -19,13 +19,14 @@ import luigi, luigi.hadoop, luigi.hdfs
 class IndividualInterval(MigoLuigiHdfs):
     '''
     Objectives:    For each member, extract the perchasing intervals of his/her own as well as his/her first and latest order date.
-    Input Fields:  <shop_id> <member_id> <order date> <money>
-    Output Fields: <shop_id> <member_id> <mean of intervals> <number of intervals> <first order date> <last order date>
     Source:        /user/erica_li/market/trans20.dat
                    <shop_id> <member_id> <order date> <money>
     Destination:   /user/erica_li/market/mu2_0212
-    Usage:         python individualinterval.py IndividualInterval --use-hadoop --src /user/erica_li/market/trans2shop.dat --dest /user/erica_li/market/lrfm_0212 --cal-date 20140202
+                   <cal_date>_<shop_id> <member_id> <mean of intervals> <number of intervals> <first order date> <last order date>
+    Usage:         python individualinterval.py IndividualInterval --use-hadoop --src /user/erica_li/market/trans2shop.dat --dest /user/erica_li/market/lrfm_0212 --cal-date 20140202 --start-dt 20140129 --end-dt 20140202
     Successor:     MuMeanStd; IndivisualIntervalFile
+    Attributes:    start_date and end_dt are neccessary
+                   concatenate cal_date and shop_id for new key for the next stage
     '''
 
     sep = luigi.Parameter(default=MIGO_MR_REPLACE_FOR_TAB)
@@ -59,9 +60,9 @@ class IndividualInterval(MigoLuigiHdfs):
         def output(shop_id, getdate, member_id, min_dt, max_dt, v):
             line = None
             if v:
-                line = "{}\t{}\t{}\t{}\t{}\t{}\t{}".format(getdate, shop_id, member_id, np.mean(v), len(v), min_dt, max_dt)
+                line = "{}_{}\t{}\t{}\t{}\t{}\t{}".format(getdate, shop_id, member_id, np.mean(v), len(v), min_dt, max_dt)
             else:
-                line = "{}\t{}\t{}\t{}\t{}\t{}\t{}".format(getdate, shop_id, member_id, -999, -999, min_dt, max_dt)
+                line = "{}_{}\t{}\t{}\t{}\t{}\t{}".format(getdate, shop_id, member_id, -999, -999, min_dt, max_dt)
             print >> stdout, line
 
         mydict = {}
@@ -82,7 +83,6 @@ class IndividualInterval(MigoLuigiHdfs):
 
                 if pre_member_id == None:
                     pre_min_date = ordate
-                    #print >> stdout, "FIRST LINE:", shop_id+"_"+ordate+"_"+member_id+"_"+ordate+"_"+ordate, []
                     output(shop_id, ordate, member_id, ordate, ordate, [])
 
                 if pre_shop_id != None and pre_member_id != None:
@@ -95,11 +95,9 @@ class IndividualInterval(MigoLuigiHdfs):
                             for i in range(1, interval):
                                 lost_dt = yesterday + td(days=i) 
                                 lost_str_dt = datetime.strftime(lost_dt, "%Y-%m-%dT00:00:00")
-                                #print >> stdout, "2ND LINE:", shop_id+"_"+lost_str_dt+"_"+member_id+"_"+pre_min_date+"_"+pre_ordate, str(itvl[:])
                                 output(shop_id, lost_str_dt, member_id, pre_min_date, pre_ordate, itvl[:])
 
                         itvl.append(interval)
-                        #print >> stdout, "3RD LINE:", shop_id+"_"+ordate+"_"+member_id+"_"+pre_min_date+"_"+ordate, str(itvl[:])
                         output(shop_id, ordate, member_id, pre_min_date, ordate, itvl[:])
 
                     if pre_member_id != member_id:
@@ -109,13 +107,10 @@ class IndividualInterval(MigoLuigiHdfs):
                             for j in range(1, diff2.days+1):
                                 supp_dt = pre_ordate_dt + td(days=j)
                                 supp_str_dt = datetime.strftime(supp_dt, "%Y-%m-%dT00:00:00")
-                                #print >> stdout, "4TH LINE:", shop_id+"_"+supp_str_dt+"_"+pre_member_id+"_"+pre_min_date+"_"+pre_ordate, str(itvl[:])
                                 output(shop_id, supp_str_dt, pre_member_id, pre_min_date, pre_ordate, itvl[:])
 
                         itvl = []
                         pre_min_date = ordate
-
-                        #print >> stdout, "LAST LINE:", shop_id+"_"+ordate+"_"+member_id+"_"+pre_min_date+"_"+pre_min_date, []
                         output(shop_id, ordate, member_id, pre_min_date, pre_min_date, [])
 
                 pre_shop_id = shop_id
@@ -126,6 +121,16 @@ class IndividualInterval(MigoLuigiHdfs):
 
             except ValueError as e:
                 self.count_fail += 1
+
+        #designed for the last member instead of new member in dataset
+        if pre_ordate:
+            final_dt = datetime.strptime(pre_ordate, "%Y-%m-%dT00:00:00")
+            if final_dt < end:
+                diff3 = end - final_dt
+                for x in range(1, diff3.days+1):
+                    supp_dt = final_dt + td(days=x)
+                    supp_str_dt = datetime.strftime(supp_dt, "%Y-%m-%dT00:00:00")
+                    output(pre_shop_id, supp_str_dt, pre_member_id, pre_min_date, pre_ordate, itvl[:])
 
         self.end_reducer()
 
