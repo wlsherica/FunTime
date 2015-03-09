@@ -1,0 +1,63 @@
+#!/usr/bin/python
+
+#Objectives: Noted how to use spark SQL in spark console
+#            1. select query
+#            2. select left joinn
+#Created date: 2015-03-09
+#user-guide: https://spark.apache.org/docs/1.2.0/sql-programming-guide.html
+
+#In general, you need 'from pyspark.sql import SQLContext'
+#Row class: convert an RDD of Row objects to a SchemaRDD, inferring the datatypes
+
+>>> from pyspark.sql import SQLContext, Row
+>>> sqlContext = SQLContext(sc)
+
+#load the target dataset
+>>> textFile = sc.textFile("hdfs://cdh4-n.migosoft.com/user/erica_li/test.dat")
+15/03/09 10:36:51 INFO storage.MemoryStore: ensureFreeSpace(260501) called with curMem=0, maxMem=556038881
+15/03/09 10:36:51 INFO storage.MemoryStore: Block broadcast_0 stored as values in memory (estimated size 254.4 KB, free 530.0 MB)
+
+>>> textFile.take(1)
+[u'kgsupermarket^C001\t00006\t2013-10-01T00:00:00\t156.63']
+
+>>> tb2= textFile = sc.textFile("hdfs://cdh4-n.migosoft.com/user/erica_li/pct.dat") 
+
+>>> parts = textFile.map(lambda l: l.split("\t"))
+>>> parts2 = tb2.map(lambda l: l.split("\t"))
+
+#Convert line to row
+>>> people = parts.map(lambda p: Row(shop=p[0], member=int(p[1]), dt=p[2], amount=float(p[3])))
+>>> table2 = parts2.map(lambda p: Row(shop=p[0], freq=int(p[1])))
+
+[[u'kgsupermarket^C001', u'00006', u'2013-10-01T00:00:00', u'156.63'], [u'kgsupermarket^C001', u'00006', u'2013-11-17T00:00:00', u'0.24']]
+[Row(amount=156.63, dt=u'2013-10-01T00:00:00', member=6, shop=u'kgsupermarket^C001')]
+
+#Infer the schema, and register the schemaRDD as a table(must to do)
+#the data  should be registered as table for further query 
+
+>>> schematable2= sqlContext.inferSchema(table2)
+>>> schematable2.registerTempTable("table2")
+
+>>> schemaPeople = sqlContext.inferSchema(people)
+>>> schemaPeople.registerTempTable("people")
+
+#simple query with WHERE function
+>>> sogt100 = sqlContext.sql("SELECT * FROM people WHERE amount >= 100")
+
+#left join
+>>> tbjoin = sqlContext.sql("SELECT x.shop, x.member, x.amount, y.freq FROM people AS x LEFT JOIN table2 AS y ON x.shop=y.shop WHERE x.amount > 100")
+
+[Row(amount=156.63, dt=u'2013-10-01T00:00:00', member=6, shop=u'kgsupermarket^C001')]
+
+>>> sogtshop = sogt100.map(lambda p: "shopMember: " + p.member)
+>>> for i in sogtshop.collect():
+        print i
+
+>>> smalltb = sogt100.map(lambda x: (x.shop, x.member, x.amount))
+>>> tbjoin2=tbjoin.map(lambda x: (x.shop, x.member, x.amount, x.freq))
+
+#output as tuple
+(u'kgsupermarket^C001', 6, 156.63) <type 'tuple'>
+(u'kgsupermarket^C001', 1004476, 138.58) <type 'tuple'>
+
+
