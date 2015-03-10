@@ -1,0 +1,17 @@
+#wk6 note for mllib: recommender
+推薦系統演算法
+
+物品或人彼此之間的相似性similarity
+1. Jaccard similarity
+2. Cosine similarity
+3. Centered Cosine Similarity
+
+rating prediction
+latent factor model
+
+alternative least square
+ALS也會有SPARSE問題
+ALS計算同時也對RMSE做最佳化
+
+movie recommendation with MLLIB
+
