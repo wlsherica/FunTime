@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 #Objectives: Noted how to use spark SQL in spark console
 #            1. select query
 #            2. select left joinn
@@ -13,14 +12,14 @@
 >>> sqlContext = SQLContext(sc)
 
 #load the target dataset
->>> textFile = sc.textFile("hdfs://cdh4-n.migosoft.com/user/erica_li/test.dat")
+>>> textFile = sc.textFile("hdfs://user/erica_li/test.dat")
 15/03/09 10:36:51 INFO storage.MemoryStore: ensureFreeSpace(260501) called with curMem=0, maxMem=556038881
 15/03/09 10:36:51 INFO storage.MemoryStore: Block broadcast_0 stored as values in memory (estimated size 254.4 KB, free 530.0 MB)
 
 >>> textFile.take(1)
 [u'kgsupermarket^C001\t00006\t2013-10-01T00:00:00\t156.63']
 
->>> tb2= textFile = sc.textFile("hdfs://cdh4-n.migosoft.com/user/erica_li/pct.dat") 
+>>> tb2= textFile = sc.textFile("hdfs://user/erica_li/pct.dat") 
 
 >>> parts = textFile.map(lambda l: l.split("\t"))
 >>> parts2 = tb2.map(lambda l: l.split("\t"))
@@ -59,5 +58,34 @@
 #output as tuple
 (u'kgsupermarket^C001', 6, 156.63) <type 'tuple'>
 (u'kgsupermarket^C001', 1004476, 138.58) <type 'tuple'>
+
+
+#example2
+
+#load the target dataset
+>>> textFile = sc.textFile("hdfs://gsupermarket/ta/20140818/")
+>>> textFile.take(1)
+[u'kgsupermarket^C001\t00006\t2013-10-01T00:00:00\t156.63']
+data = textFile.map(lambda l: l.split("\t"))
+ta_raw = data.map(lambda p: Row(Store_id=p[0], dt=p[1], dt_tag=p[2], member_id=p[3], tag1=p[4], tag2=p[5], tag3=p[6]))
+
+schemaTag= sqlContext.inferSchema(ta_raw)
+schemaTag.registerTempTable("ta_raw")
+
+rule_dict = {"Store_id":"kgsupermarket", "dt_tag":"", "tag1":"L7D", "tag2":"", "tag3":""}
+
+rules = " and ".join(["{} = {}".format(k, v) for k, v in rule_dict.items() if v])
+
+cmd = "SELECT member_id FROM ta_raw WHERE {}".format(rules)
+top20 = sqlContext.sql("SELECT member_id FROM ta_raw LIMIT 10")
+
+output = top20.map(lambda p: p.member_id)
+      
+if os.path.exists("/home/erica_li/tmp/output.txt"):
+    #remove local folder
+    shutil.rmtree("/home/erica_li/tmp/output.txt")
+    print "remove folder already"
+else:
+    output.saveAsTextFile("file:///home/erica_li/tmp/output.txt")
 
 
