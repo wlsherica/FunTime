@@ -1,0 +1,29 @@
+
+
+#reference: http://spark.apache.org/docs/latest/monitoring.html
+#How to launch spark standalone cluster mode
+#Spark 1.0.0
+
+#/usr/bin/spark
+cd $SPARK_HOME
+
+#finished spark-env.sh
+scp /etc/spark/conf.dist/spark-env.sh root@10.0.1.16:/etc/spark/conf.dist/
+
+#created spark history folder
+./sbin/start-history-server.sh hdfs://cdh4-n.com/user/spark/applicationHistory
+
+#check the port status
+netstat  -apn | grep 8080
+
+#start master & workers
+./start-all.sh
+
+#chek log status
+ls /var/log/spark
+
+#submit your job
+./bin/spark-submit --master spark://cdh4-dn2:7077 --executor-memory 3g --driver-memory 1g /home/erica_li/proj/migo/athena/modules/spark_ta/bin/ta_query.py -d "kgsupermarket^C001:L7D:20140818:8192:0:0" -i hdfs://cdh4-n.migosoft.com/user/athena/ta
+
+#master UI
+http://cdh4-dn2.com:18080/
