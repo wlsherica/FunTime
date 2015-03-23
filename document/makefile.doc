@@ -3,3 +3,150 @@
 make
 make install
 
+#one bottom click
+#!/bin/sh
+
+yum -y groupinstall "Development tools"
+yum -y install wget zlib-devel bzip2-devel openssl-devel ncurses-devel
+yum -y install mlocate blas.x86_64 blas-devel.x86_64 freetype-devel.x86_64 freetype.x86_64 libpng-devel.x86_64 libpng.x86_64 lapack.x86_64 lapack-devel.x86_64
+
+install(){
+    local package=$1
+
+    ./configure
+    ret=$?
+    if [ ${ret} -eq 0 ]; then
+        make
+        ret=$?
+        if [ ${ret} -ne 0 ]; then
+            echo "Fail in 'make' for ${package}"
+            exit 99
+        else
+            make install
+            ret=$?
+            if [ ${ret} -eq 0 ]; then
+                echo "Successfully Install ${package}"
+            else
+                echo "Terminated due to the installation failure of ${package}"
+                exit 999
+            fi
+        fi
+    else
+        echo "Fail in 'configure' for ${package}"
+        exit 9
+    fi
+}
+
+# Copy the zip files to temp folder
+cp /home/util/makefile/lib/* /tmp
+
+# Install Python2.7.8
+cd /tmp
+tar xf Python-2.7.8.tar.xz
+cd Python-2.7.8
+./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
+
+ret=$?
+if [ ${ret} -eq 0 ]; then
+    make && make altinstall
+
+    ret=$?
+    if [ ${ret} -eq 0 ]; then
+        echo "Install Python2.7.8 Successfully"
+    else
+        echo "Fail to make && make altinstall Python2.7.8"
+        exit 1
+    fi
+else
+    echo "Fail to configure Python2.7.8"
+
+    exit 2
+fi
+
+# Build Symbolic Link
+mv /usr/bin/python /usr/bin/python.bak
+ln -s /usr/local/bin/python2.7 /usr/bin/python
+ret=$?
+if [ ${ret} -eq 0 ]; then
+    echo "Link /usr/bin/python --> /usr/local/bin/python2.7 Successfully"
+
+    rm /usr/bin/python.bak
+
+    # Yum Setting
+    sed -i 's/python/python2\.6/g' /usr/bin/yum
+else
+    echo "Fail to link /usr/bin/python --> /usr/local/bin/python2.7"
+
+    mv /usr/bin/python.bak /usr/bin/python
+    exit 3
+fi
+
+# Install pip
+cd /tmp
+ 
+# Then install it for Python 2.7 and/or Python 3.3:
+python ez_setup.py
+ 
+# Now install pip using the newly installed setuptools:
+easy_install-2.7 pip
+
+# Install the third-party lib for Python2.7.8
+for package in $(echo matplotlib numpy pymongo scikit-learn ipython gearman pyinotify docutils python-daemon pandas config scipy);
+do
+    pip install ${package}
+
+    ret=$?
+    if [ ${ret} -eq 0 ]; then
+        echo "Successfully install ${package} for Python2.7.8"
+    else
+        echo "Terminated because the installation failure of ${package}"
+        exit 4
+    fi
+done
+
+pip install -Iv luigi==1.0.19
+
+# Install the necessary library for tmux
+cd /tmp
+tar -xvzf libevent-2.0.21-stable.tar.gz
+cd libevent-2.0.21-stable
+./configure && make && make install
+
+# Install the tmux
+cd /tmp
+tar -xvzf tmux-1.9a.tar.gz
+cd tmux-1.9a
+./configure && make && make install
+
+echo 'export LD_LIBRARY_PATH=/usr/local/lib' >> /etc/profile
+
+# Copy the SSH key from remote athena and pandora
+for account in $(echo erica);
+do
+    # Here, your need to check the existing of athena and pandora accounts or not   
+    id ${account}
+    ret=$?
+    if [ ${ret} -ne 0 ]; then
+        useradd -G erica ${account}
+        ret=$?
+        if [ ${ret} -eq 0 ]; then
+            echo "Successfully Creating ${account} account"
+        else
+            echo "Fail in Creating ${account} account"
+            continue
+        fi
+    fi
+done
+
+cp -pr /data/util/makefile/ssh ~/.ssh
+chmod 700 ~/.ssh
+
+# Copy SSH Key
+for username in $(echo athena pandora hestia);
+do
+    cp -pr /data/util/makefile/${username}_ssh /home/${username}/.ssh
+    chmod 700 /home/${username}/.ssh
+
+done
+
+
