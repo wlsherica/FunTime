@@ -15,3 +15,73 @@ export PATH=/opt/scala/sbt/:$PATH
 source ~/.bashrc
 
 sbt sbt-version
+
+#scala note:
+#define a func
+def helloWorld() {
+  println("Hello World")
+}
+
+#just use val for definition
+val readOnly = "This is read only"
+
+cala> def helloworld2(prompt: String)={
+     |     println (prompt)
+     | }
+helloworld2: (prompt: String)Unit
+
+#set default value in func
+scala> def printH(line: String="the is default value"){
+     |     println(line)
+     | }
+printH: (line: String)Unit
+
+#return int
+scala> def mtp(x: Int, y: Int) = x*y
+mtp: (x: Int, y: Int)Int
+
+scala> mtp(19, 10)
+res15: Int = 190
+
+scala> val result1 = mtp(19, 10)
+result1: Int = 190
+
+scala> println("RESULT: " + result1)
+RESULT: 190
+
+#test.scala
+[erica_li@cdh4-dn2 bin]$ cat test.scala
+def max(a: Int, b: Int): Int = {
+    if (a > b){
+        return a
+    } else {
+        return b
+    }
+}
+
+println(max(999, 2))
+
+#gentle style
+scala> def max(a: Int, b: Int) = if (a > b) { a } else { b }
+max: (a: Int, b: Int)Int
+
+scala> val max1 = max(123, 99999)
+max1: Int = 99999
+
+scala> def sum(n: Int): Int = if (n==0) { 0 } else {n + sum(n-1)}
+sum: (n: Int)Int
+
+scala> val sum1 = sum(3)
+sum1: Int = 6
+
+scala> val sum1 = sum(10)
+sum1: Int = 55
+
+#fluent interface
+cala> val words = List("a", "apple", "banana", "fruit", "car", "card", "dog", "bird")
+words: List[String] = List(a, apple, banana, fruit, car, card, dog, bird)
+
+scala> words.filter(_.length > 4).map(_.toUpperCase).foreach(println)
+APPLE
+BANANA
+FRUIT
