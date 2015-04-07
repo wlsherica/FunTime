@@ -1,0 +1,35 @@
+#note for spark on EC2
+spark-ec2是一個套件for AWS
+
+ease but not enough
+當更新時，必須安裝更新那些script
+有很多arguments，特別是要launch cluster時
+
+git已經有sbt-spark-ec2
+
+#How to use it?
+pip install awscli
+是官方command，python module
+
+export AWS_ACCESS_KEY_ID=
+export AWS_SECRET_ACCESS_KEY=
+
+create project/plugins.sbt
+加上addSbtPlugin("net.....")
+
+create spark-conf.json
+e.g. cluster-name, master-type, slave-type, num-of-slaves, main-class, app-name, keypair, pem, region...
+
+write your job
+e.g. src/main/scala/package/Main.scala
+
+launch the cluster: $sbt sparkLaunchCluster
+
+submit your job:
+sbt  sparkSubmitJob <args>
+
+other commands...
+
+https://github.com/pishen/sbt-spark-ec2
+
+
