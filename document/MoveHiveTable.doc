@@ -1,0 +1,69 @@
+Step1：檢查hdfs hive folder大小
+$ hadoop fs -du -s -h <hdfs path>
+
+Step2：檢查local disk space確定檔案可以送到local disk
+$ df -h <local path>
+
+Step3：取得原本hive table schema
+$ hive
+#hive
+use er;
+describe er_testing_viewinfo_vw;
+describe formatted er_testing_viewinfo_vw;
+select * from er_testing_viewinfo_vw limit 3;
+
+dates	string
+time	string
+ssid	string
+eruid	string
+uid	string
+cat	string
+cat1	string
+cat2	string
+cat3	string
+cat4	string
+cat5	string
+cat6	string
+pid	string
+ercamp	string
+erad	string
+
+/user/hive/warehouse/er.db
+
+CREATE TABLE local_create_n20_2
+row format delimited fields terminated by '\t'  
+AS select * from local_create_n20 limit 5;
+
+#export 
+insert overwrite 
+local directory '/home/tmp_erica' 
+row format delimited fields 
+terminated by '\t'
+select * from er_testing_viewinfo_vw limit 20;
+
+#Created this file into Hive
+drop table local_create_n20;
+create external table local_create_n20
+(
+dates string,
+time string,
+ssid string,
+eruid string,
+uid string,
+cat string,
+cat1 string,
+cat2 string,
+cat3 string,
+cat4 string,
+cat5 string,
+cat6 string,
+pid string,
+ercamp string,
+erad string
+)   
+row format delimited fields terminated by '\t'
+location '/user/test/erica/hive';
+
+load data local inpath '/home/tmp_erica/*' 
+into table local_create_n20;
+
