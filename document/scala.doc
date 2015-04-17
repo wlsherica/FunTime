@@ -1,0 +1,42 @@
+#scala note:
+
+%spark
+var capital = Map("US"->"Washington","France"->"Paris")
+capital += ("Japan"->"Tokyo")
+println(capital("US"))
+
+def sqt2(x: Int): Int = {
+    x*x
+}
+sqt2(4)
+
+def sqt3(x: Int) = x*x*x 
+sqt3(2)
+
+var i = 0
+while (i<5) {
+    if (i != 3)
+        println("Not equal to three: " + i)
+    else
+        println("Else: " + i)
+    i += 1
+}
+
+val greetlist = new Array[String](3)
+greetlist(0) = "First"
+greetlist(1) = "Second"
+greetlist(2) = "Third"
+
+val nameList = Array("Cindy","Erica","Ande")
+nameList.length
+
+%spark
+val mylist = List("Erica","Cindy")
+val mylist2 = List("Miranda")
+val tlist = mylist :: mylist2
+val tlist2 = mylist ::: mylist2
+--
+tlist: List[Object] = List(List(Erica, Cindy), Miranda)
+tlist2: List[String] = List(Erica, Cindy, Miranda)
+
+
