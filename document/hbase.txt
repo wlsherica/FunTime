@@ -1,0 +1,182 @@
+#20150421 hbase lesson
+Hbase no sql db, how to use it?
+
+Cloudera: big data company, like IBM.
+1. What is Hbase?
+No sql = not only sql
+處理RMDBs無法解決的事
+有特定解決的問題
+
+四種no sql db
+#key-value pair分散式資料庫, e.g. big table from google, apache hbase, apache cassandra, 儲存社群網站等資料,尤其資料內有時間
+#memory: memory, 加快讀取速度, e.g. memcached, redis
+#doc db: 結構鬆散成非結構資料庫e.g. mongodb, rlak, couchdb, 適合xml, 圖片或影音
+#graph db: 點點之間的關聯 neo4j, infogrid, allefrogrph, tree結構記錄社交網站的邀請, 或是地圖上的距離
+
+資料永遠是散開的 如何確定永遠拿到的資料是最新的？
+
+CAP理論: brewer's理論, consistency availability, partition-tolerance 
+$All clients always have the same view of the data
+$Each client can always read and write 任何時間點訪問都一定至少要有一個節點回應client
+$The system works well despite physical network partition 
+
+Hbase永遠選擇C優先, consistency, 並非無availability 
+Hbase是cluster, master, slaves
+Cassandra屬於偏重A, 例如兩個client問資料，一人新一人舊，資料同步比較慢
+
+Hbase: consistent, distributed, sorted map有排序, 不斷排序, 為了查找資料
+*non-relational!
+*writed in Java
+*100% on hadoop
+*scalability
+*batch process with MR
+
+資料太多我得分開存, 所以用hbase
+hdbs + random read/write = hbase
+優點: consistency, 不管你怎麼問都是最新資料
+為了提供large table而建立, from big table idea
+是schemaless data model, column可以一直長
+
+Hbase history: 2003~ google file system
+2004~ mapreduce from google
+2007~ first hbase commit
+2008~ sub-project on hadoop
+2010~ top level project
+2011~ crawl cache yahoo!, msg on hbase FB, CDH3 with Hbase 0.90.1 雙數就是stable version, search engine(Cassini 庫存查詢) on Hbase for eBay
+Hbase 可以承載大量read, 同時給多個client使用
+2012~ Hbase 0.92.0, 0.94.0, Hbase conference
+2013~ salesforce (CRM company) 做出sql界面的hbase, only for small data
+
+2. When to use Hbase?
+Lots of data, first
+Large amount of clients
+現行solution無法解決的時候
+instant msg共同點是: user很多
+hadoop 空間靠加disk而來
+
+When not to use Hbase?
+Saving large object > 3MB per cell 例如excel
+
+Big table: column多, 也很多null
+
+node=worker, request會直接下給worker
+
+Columne-oriented store: 東西直著找
+Hbase save the data grouped by column family
+column family要先定義, 可在裡面長很多column, 小column叫做qualifier
+e.g. 照片資料存放, 大+瑣碎
+Hbase以{row, column, timestamp}
+對每一個版本用timestamp並且desc排序, 最新永遠在最後面
+row是用字典序排, 除了timestamp都是字典序
+key{Row, Column:Qualifier, Timestamp} => Value
+
+Hbase dataformat:
+table 
+row
+column family
+qualifier
+Timestamp
+Value
+
+Schema Design Principl: DDI
+Denormalization
+Duplication 重複儲存那些資料
+Intelligence keys 設計好壞影響如何找資料存資料
+
+補充: 有timestamp的資料很適合存在hbase, 例如天氣資料, 爬蟲資料的索引
+可任意增加qualifier
+幫你把資料存下來做排序, hbase的工作
+
+HUE, 只有gui界面
+可用它來操作hbase, read table 
+
+3. How to use Hbase?
+
+create 't1', 'cf'
+create 't1', {NAME => 'f1'}, {NAME => 'f2'}
+create 't1', 'f1', 'f2'
+create 't1', 'NAME => 'f1', VERSIONS => 1, TTL => 2592000, BLOCKCACHE=> true}
+#資料如果有時效性, 可設定TTL, TTL=-1為永久不變不過期
+#blockcache是快取, 預設true, 一定要開, 決定hbase讓資料被快速access到的關鍵, 雞肋參數
+讀資料一定要放到memory
+關閉時的情境會是full scan
+
+delete=update=insert
+
+put 'test', 'row1', 'cf:a', 'value1'
+
+Excel:
+     cfa  cfb  cfc
+row1 val1
+row2     val2
+row3          val3
+
+scan 'test'
+空的就沒存, 只有keyvalue pair才存
+預設會增加timestamp
+
+#get data
+get 'test', 'row2'
+
+disable 'test'
+enable 'test'
+drop 'test'
+describe 'test'
+
+資料其實還是存在hdfs
+只是hbase會去起region去聽
+一個region會共用一個memory 
+
+4. Hbase data model
+
+5. Hbase Architect
+Hbase daemons
+Zookeeper -> HMaster(n>=1) -> Many Region servers
+HMaster: 分派region server管理的範圍/負責server的平衡load balance/偵測故障的region server並重新分配/HDFS垃圾回收WAL/更新table schema/維護hDFS&zookeeper的metadata
+WAL:write ahead log
+hbase也會有過期資料, version太舊的資料, Hmaster會決定何時要清掉
+東西不是在zookeeper上就是hdfs, zookeeper資料都是存在ram裡面, 很消耗資源, 就像是小cluster
+Region server:都run在datanode上, 有資料的datanode, 會維護master分配的region處理對region的IO request, 讀寫資料.
+              如果region超過門檻, (可設定), 可以自動幫你切region, 以row為單位中間切一刀, 切完後通知master再assign region server去維護
+
+Zookeeper: 會存region mapping data, region server status, hbase schema (e.g. table list, col family, etc..)
+Hlog: 對region server寫資料時, 會有hlog記錄每一次寫下的data, Hlog會寫一個實體的file到disk
+
+一個region server可以有多個region, 一個region可以有很多store
+Store: host一個column family的單位, 又可分store file or Hfile(最小儲存單位已sorted). memstore per store, 是坐在memory裡面
+寫滿會做flush, 寫成hfile, 再由一個storefile來host
+所以如果沒資料就沒有store file, store file size也會變動, 數量也是. 
+
+hbase read path: client會帶table name, cf去問ZK, 問region在哪裡, 再找region server, 直接找有資料的節點拿data.
+接著進region, 問每一個store file, mem store, 問row有沒有, 有就取latest one, (開bloom filter的話會回答資料有無在這裡 加速查詢)
+如果資料在hfile(in hdfs)裡面, 則需要將hfile拿到blockcache裡面放到memory裡面再帶走
+
+Compaction: 壓實
+多半以手動作, hbase版本不同計算公式會有差
+合併多個Hfile => one Hfile
+減少hfile個數
+當hfile達到threshold就執行compaction, 也可以手動操作
+> minor compaction 部分文件整合 讓file變少而已 不會刪到資料
+> major compaction 完整文件合併 找東西會變快 可提升performance
+    @ 刪除過期以及已刪除的data 
+    @ 一個store將留下一個storefile
+
+client --- put/delete ---> region server --- write to WAL --> WAL -- write to memstore --> memstore --- flush to disk --> HFile!
+
+Splitting: 負責切分在運行過程中超過門檻的region 以region為單位做
+可手動或自動化, 通常手動作, 門檻會故意調很大
+是切reference, 非真的file
+優點: 縮小hfile file size, 提高分散使用機率, 從中間以row單位來切 極限是一個file裡面只有一個row
+缺點: 增加檔案數量, 造成IO數提高, split時 region會暫時disable
+
+flush也是以region單位操作, 為了保持這個region正常被運作, 會alocate一個同樣size的memstore做flush
+會吃很多memory, flush-storm, 會explode
+
+如果有很多column family時, 可能有storm...
+
+6. Case studies
+
+資料都是byte
+
+
+#end
