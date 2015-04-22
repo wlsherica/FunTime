@@ -1,0 +1,58 @@
+#Oozie note:
+Oozie: DAGs action, not for real-time
+How it works?
+submit workflow.xml->hdfs上找workflow.xml -> workflow.xml/coordinator.xml
+啟動:
+  export OOZIE_URL=......
+  oozie job -run .......
+  oozie jobs 看所有job list
+  oozie jobs -jobtype coord
+  oozie jobs -kill 號碼
+
+支援參數化, 支援fail nodes, 可rerun
+
+基本單位task/action, e.g. hive script
+workflow: consists of tasks/actions
+coordinator: triggered on specified terms 一次只能啟動一個workflow
+bundle: a set of coordinator applications
+
+Lifecycle:
+--> PREP 準備中 --> RUNNING | KILLED --> SUSPENDED  (manually running | killed) | SUCCEEDED | KILLED 
+
+Use cases:
+1. 當crontab on hadoop
+
+ER:
+SAS版本, 每24hr跑一次: parse data -> nginx -> hive -> analysis panel
+
+Oozie API: RESTful API
+1. Web services API
+2. HUE webUI console
+3. Java client API
+4. Command line tools
+
+必建檔案
+1. *.properties
+兩個部分, 指定namenode, jobtracker, file path....etc.
+第二部分是參數化, 帶入workflow用的
+2. coordinator.xml
+設定細節, 設定frquency, 語法固定
+
+How to execute oozie job?
+1. in the action: specify hive action, for example
+2. specify xml path
+3. hive-site.xml
+4. script path
+
+Sub workflow:
+added <sub-workflow>
+
+Web UI: yoursite:11000/oozie/
+
+SLA功能 oozie 4.x up: 可以設定SLA啟動結束跟duration, 做監測用
+
+
+
+
+
+
