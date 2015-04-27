@@ -1,5 +1,4 @@
-
-
+#I
 #reference: http://spark.apache.org/docs/latest/monitoring.html
 #How to launch spark standalone cluster mode
 #Spark 1.0.0
@@ -23,7 +22,41 @@ netstat  -apn | grep 8080
 ls /var/log/spark
 
 #submit your job
-./bin/spark-submit --master spark://cdh4-dn2:7077 --executor-memory 3g --driver-memory 1g /home/erica_li/proj/migo/athena/modules/spark_ta/bin/ta_query.py -d "kgsupermarket^C001:L7D:20140818:8192:0:0" -i hdfs://cdh4-n.migosoft.com/user/athena/ta
+./bin/spark-submit --master spark://localhost:7077 --executor-memory 3g --driver-memory 1g /home/erica_li/proj/athena/modules/spark_ta/bin/ta_query.py -d "kgsupermarket^C001:L7D:20140818:8192:0:0" -i hdfs://localhost.com/user/athena/ta
 
 #master UI
 http://cdh4-dn2.com:18080/
+
+#II
+#How to create spark standalone cluster mode on Mac OS x
+#First you have to download and setup Spark
+#Generated a spark-env.sh for setting
+cp spark-env.sh.template spark-env.sh
+
+#Used lsof for listening port instead of netstat
+sudo lsof -i -P | grep -i 'listen'
+
+#Because of Apache zeppelin, 8080 was used.
+vim conf/spark-env.sh
+SPARK_MASTER_WEBUI_PORT=4444
+
+http://10.1.207.127:4444/
+
+#Start all
+$ sh start-all.sh
+starting org.apache.spark.deploy.master.Master, logging to …
+localhost: ssh: connect to host localhost port 22: Connection refused
+
+#Then you need to enable "remote login" for your machine. From System Preferences, select Sharing, and then turn on Remote Login!
+
+#voila! Done!
+
+#default port for spark
+7077 – Default Master RPC port
+7078 – Default Worker RPC port
+18080 – Default Master web UI port
+18081 – Default Worker web UI port
+
+
+
+
