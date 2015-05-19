@@ -1,0 +1,56 @@
+#note from hadoop first day lecture 
+1. What is hadoop?
+Framework for running distributed applications on large cluster built of commodity hardware
+Data locality, 誰有資料誰做事
+Fault-tolerant via replication 預設三份複製
+Scalable storage capacity and computing resource
+Built-in resource rebalancer
+
+2. Pig, example (hadoop ETL)
+schema on-read
+不為可查詢語言，是資料流語言，lazy evaluation
+You can run Pig in local mode using the command line option -x local. Pig only works with a single filesystem at once.
+
+Book = LOAD 'file.txt' USING TextLoader() AS (lines:chararray);
+Wordlist = FOREACH Book GENERATE FLATTEN(TOKENIZE(lines)) as words;
+GoupWords = GROUP Wordlist BY word;
+CountGroupWords = FOREACH GroupWords GENERATE group AS word, COUNT(Wordlist) as num_occurence;
+WordCountSorted = ORDER CountGroupWords BY $1 DESC;
+STORE WordCountSorted INTO 'wordcount' USING PigStorage(',');
+
+Scalar Types:
+int
+long
+float
+double
+chararray
+bytearray
+
+Complex Types:
+tuple
+bag {(1,2),(2,3)}
+map [open#abc]
+
+Pig eats everything:
+A = LOAD 'file.txt' AS (var1:chararray, var2:int);
+
+只有在遇到DUMP或是STORE才會執行，底層一樣是mapreduce
+
+傳統RDB都是schema on-write，對於寫入資料庫比較嚴謹
+
+Relational Operattions:
+FOREACH = SELECT in SQL
+  a = LOAD 'file.txt' AS (id, age, height, weight);
+  b = FOREACH a GENERATE id, age;
+FILTER
+  b = FILTER a by id matches 'a000*';
+GROUP
+ORDER BY #unstable operation
+  c = ORDER a BY age DESC, weight; #一定要放在最後面
+DISTINCT
+JOIN
+  result = JOIN tableA by var1, tableB by var1;
+  result2 = FOREACH result GENERATE col1, var1, var2, var3;
+...
+
+
