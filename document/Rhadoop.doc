@@ -1,0 +1,79 @@
+#Rhadoop lecture
+MRV1: client送工作給job tracker, 會詢問name node位置, JT根據資料本地性決定跟誰拿
+會再有資料的地方起mapper, 分別處理資料再透過reducer從中介磁碟整合再寫回hdfs
+至少會有一個mapper, 不一定會有reducer
+
+sqoop2一定有mapper and reducer
+hadoop生態圈不包括hdfs+mr, 以外的模組e.g. sqoop這類的才算
+
+hadoop的限制
+資料最好超過TB PB
+hadoop是批次執行
+可分散問題的效果比較差, 例如 global最佳化或是圖形計算問題
+他不是資料庫替代品無法產生快速回應
+可以使用hbase or nosql做替代品
+無法做即時查詢 可改用impala
+不適合大量回圈運算 可用spark取代
+
+192.168.60.250
+root 5u4wj6
+
+map緩慢原因 啟動daemon時間長 元件協調時間長 map東西會寫入磁碟
+
+RHBASE INSTALL from ywchiu
+hbase shell
+
+create 't1','f1'
+
+ERROR: Can't get master address from ZooKeeper; znode data == null
+
+restart habase service
+
+sudo service hbase-master restart
+
+sudo env JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera /usr/lib/hbase/bin/hbase-daemon.sh restart regionserver
+
+sudo service zookeeper-server restart
+
+install thrift
+
+sudo yum install automake libtool flex bison pkgconfig gcc-c++ boost-devel libevent-devel zlib-devel python-devel ruby-devel
+
+sudo yum install openssl openssl-devel
+
+wget https://archive.apache.org/dist/thrift/0.8.0/thrift-0.8.0.tar.gz
+
+tar -zxvf thrift-0.8.0.tar.gz
+
+cd thrift-0.8.0
+
+./configure
+
+make
+
+sudo make install
+
+config thrift
+
+sudo updatedb
+
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
+
+pkg-config --cflags thrift
+
+sudo cp /usr/local/lib/libthrift-0.8.0.so /usr/lib64/
+
+install rhbase
+
+wget --no-check-certificate https://github.com/RevolutionAnalytics/rhbase/blob/master/build/rhbase_1.2.1.tar.gz?raw=true
+
+mv rhbase_1.2.1.tar.gz\?raw\=true rhbase_1.2.1.tar.gz
+
+sudo PKG_CONFIG_PATH=/usr/local/lib/pkgconfig R CMD INSTALL rhbase_1.2.1.tar.gz
+
+###
+ravro: 資料序列化
+rhbase
+rhdfs
+rmr
+plyrmr 類sql篩選資料
