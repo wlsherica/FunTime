@@ -1,0 +1,51 @@
+#sqoop
+sqoop create-hive-table \
+--connect jdbc:postgresql://etu-master:5432/psql \
+--username hive -P \
+--table nyse_daily \
+--hive-table etu301.nyse_daily
+
+sqoop import \
+--connect jdbc:postgresql://etu-master:5432/psql \ 
+--username hive -P \
+--table nyse_daily \
+--hive-import --hive-table etu301.nyse_daily \
+--where "tdate >= '2009-01-01' AND tdate <= '2009-12-31'" -m 1
+
+#pig
+#Jorge Posada	New York Yankees	{(Catcher),(Designated_hitter)}	[games#1594,hit_by_pitch#65,on_base_percentage#0.379,grand_slams#7,home_runs#243,at_bats#5365,sacrifice_flies#43,gdb#163,sacrifice_hits#1,ibbs#71,base_on_balls#838,hits#1488,rbis#964,slugging_percentage#0.48,batting_average#0.277,triples#9,doubles#342,strikeouts#1278,runs#817]
+
+table_raw = LOAD './baseball.tsv' USING PigStorage('\t') AS (
+    name: chararray,
+    team: chararray,
+    posi: bag{t:(p:chararray)},
+    bat: map[]
+); 
+table_2 = FOREACH table_raw GENERATE team, bat#'batting_average' AS batavg;
+table_bat = FILTER table_2 BY batavg IS NOT NULL;
+result = ORDER table_bat BY batavg DESC;
+STORE result INTO 'team_batavg' USING PigStorage(',');
+
+#hive
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+set hive.exec.max.dynamic.partitions.pernode=500;
+set hive.exec.max.created.files=150000;
+set hive.enforce.bucketing=true;
+
+CREATE TABLE nyse_daily_pb (
+  exchange string,
+  symbol string,
+  open double,
+  high double,
+  low double,
+  close double,
+  volume int,
+  adj_close double
+) PARTITIONED BY (tdate string) 
+CLUSTERED BY (volume) INTO 5 BUCKETS;
+
+INSERT OVERWRITE TABLE nyse_daily_pb PARTITION(tdate) 
+SELECT exchange, symbol, open, high, low, close, volume, adj_close, tdate
+FROM nyse_daily ;
+
