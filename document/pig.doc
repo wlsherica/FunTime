@@ -1,0 +1,65 @@
+#Pig lecture
+Nested data model
+join, filter, grouping, ordering
+UDF
+非控制流語言, 無if else then
+儘可能by日期讀檔案
+
+hive vs. pig
+pig is procedural, sql is declarative 
+pig is nested data model, sql is flat relation data model
+pig schema is optional, you need to provide schema for sql
+pig is scan-centric analytic workloads, sql is OLTP-OLAP workloads
+pig is execution plan, you can explicitly defined, sql usually relies on sql engine for query plan
+
+hadoop不是用來取代傳統RDB
+
+bag in pig is unordered
+map is key/value pair, key must be chararray 
+[name#{()}, age#(a2, a3)]
+relation就是一個bag, 是sql的大表
+
+bag是用來裝tuple的東西, 產生後會再建造一個bag
+A=Load 'input' AS (b:bag{t:(x:int, y:int)});
+B=Foreach A Generate b.x; -- NOT b.t.x
+C=Foreach A Generate b.(x,y);
+- Relation B contains a bag filled with tuples of field x
+- Relation C contains a bag filled with two tuples of x and y
+
+A=Load 'data' AS (dep:chararray, sales:int, cost:int);
+A2=Foreach A generate sales-cost as profit;
+B=Group A By dept;
+C=Foreach B Generate group, SUM(A2.profit);#SUM(A.sales)-SUM(A.cost) for instead 
+
+Map 
+- A=Load 'input' AS (m:map[]);
+- B=Foreach A Generate m# 'attribute';
+
+Select Top 5:
+top5= limit datafile 5; 
+dump top5;
+
+Order by
+srtRecords=ORDER weblog BY timestamp desc, ip;
+
+Join: default inner, (left, right, full outer)
+- newrel = join A by key left outer, B by key;
+- newrel = join B by key right outer, A by key;
+- newrel = join A by key full outer, B by key;
+
+default不會過濾distinct (union in pig)
+
+Self join, 需拷貝多一份資料 ( = inner join) 
+
+Streaming : evaluation function
+pig丟出input給script當stdin讀入, script只會被讀一次, 
+
+define: rename, constructer, streaming 三用途
+
+DBstorage: udf
+所有產出都是寫hdfs上，而dbstorage就是寫到RDB，pig處理後的資料如沒有很大，存到RDB OK，倘若如果上百萬千萬，避免用DBstorage傳輸
+不如寫hdfs之後再用sqoop傳送，兩段式操作。
+
+#1 filter first
+#2 choose the right data type, cast很吃成本
+
