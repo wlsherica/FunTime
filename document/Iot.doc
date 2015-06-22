@@ -1,0 +1,40 @@
+#Iot Azure ML training
+https://github.com/ericsk/AzureIoTCamp
+
+Internet of Things
+事件中心: 高頻率資料處理的que, 在後續做批次處理, 解決寫入頻寬的問題, 會定期消失, 如需永久保留, 則要另外處理
+通知中樞: data從sensor寫入, 讓系統發msg做反應 
+串流分析: 監督中心, 可以監測event hubs, 可寫一個query表示當資料進入event hubs時就做反應, 例如filter之類
+ML: 模擬人類學習行為
+HDIsight: hadoop user
+Power BI for Office
+
+Event hubs: 訊息傳遞的佇列服務
+每秒處理百萬事件
+支援AMQP, REST(HTTPS)傳遞資料
+支援分割partition平行處理
+8~32個partition, 一開始如果設定n數量, 如想改變則需另外開一個新的event hubs
+他的目的本就不是儲存資料
+
+中樞: 每筆資料上限64kb
+是service bus其中一個服務
+在SB底下去建立event hubs
+設定訊息停留在hub的時間最多2wk
+
+串流分析 (如有及時監控的需求)
+是一個常駐的背景程式
+結果輸出可以在SQL DB, blob儲存體, 事件中心三種
+串流分析中間可以進行sql查詢, 拿query套在data上面是否符合, 如果是則往下, 可做排程
+資料可來自多種來源, 資料必須儲存在azure blob儲存體, 為考量效能會做cache
+
+目前支援的串流資料格式有三：csv, json, avro
+
+add an output to your job: Blob storage, SQL DB, Azure event hub
+
+Hadoop INsight
+
+
+
+
+
+
