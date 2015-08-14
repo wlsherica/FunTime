@@ -1,0 +1,63 @@
+#Author: Erica Li
+#Date: 2015-07-24
+#Objective: install ipython notebook with Spark on Centos6
+#Reference: http://ipython.org/ipython-doc/1/interactive/public_server.html
+#           https://districtdatalabs.silvrback.com/getting-started-with-spark-in-python
+#           https://plot.ly/ipython-notebooks/apache-spark/
+
+#su root
+wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py -O - | python
+
+easy_install pip
+
+#start to pip install <packages>
+#fail
+matplotlib
+
+#success
+numpy scikit-learn ipython pyinotify docutils pandas scipy
+
+easy_install gevent
+
+#f you are under RHEL/centos 6, you can try this:
+cp /usr/lib64/python2.6/lib-dynload/_sqlite3.so /usr/local/lib/python2.7/sqlite3/
+
+>>> passwd()
+Enter password:
+Verify password:
+'sha1:4651dfd1c856:9470809e6b17554e0f46f6bc11af463151085c4b'
+
+Country Name (2 letter code) [XX]:TP
+State or Province Name (full name) []:TAIPEI
+Locality Name (eg, city) [Default City]:TAIPEI
+Organization Name (eg, company) [Default Company Ltd]:
+Organizational Unit Name (eg, section) []:TAIWAN
+Common Name (eg, your name or your server's hostname) []:pymaster
+
+Email Address []:wlsherica@hotmail.com
+
+[root@master1 ~]# ipython profile create nbserver
+[ProfileCreate] Generating default config file: u'/root/.ipython/profile_nbserver/ipython_config.py'
+[ProfileCreate] Generating default config file: u'/root/.ipython/profile_nbserver/ipython_kernel_config.py'
+[ProfileCreate] Generating default config file: u'/root/.ipython/profile_nbserver/ipython_console_config.py'
+[ProfileCreate] Generating default config file: u'/root/.ipython/profile_nbserver/ipython_notebook_config.py'
+[ProfileCreate] Generating default config file: u'/root/.ipython/profile_nbserver/ipython_nbconvert_config.py'
+
+#create pem file
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout mycert.pem -out mycert.pem
+
+vim /root/.ipython/profile_nbserver/ipython_config.py
+
+#add info below to ipython_config.py
+c.NotebookApp.certfile = u'/path/to/mycert.pem'
+c.NotebookApp.ip = '*'
+c.NotebookApp.open_browser = False
+c.NotebookApp.password = u'<your password>'
+c.NotebookApp.port = 9999
+
+#try it! passwd = P@ssw0rd
+ipython notebook --profile=nbserver
+
+#try it with spark
+PYSPARK_DRIVER_PYTHON=ipython PYSPARK_DRIVER_PYTHON_OPTS="notebook --profile=nbserver" /usr/lib/spark/bin/pyspark
+
