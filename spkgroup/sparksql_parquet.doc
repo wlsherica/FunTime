@@ -1,0 +1,60 @@
+#Spar SQL and parquet
+#2015-08-27
+
+Objectives: Robust data pipeline
+Kafka->streaming->hdfs/parquet->ml
+     ->s3->ETL->hdfs/parquet->sql
+
+Why Spark?
+perfect for ML application
+a general engine for every aspect usage
+big data jungle
+
+Why SQL
+all engineer can involved into data project
+
+SQL+time range -> user interface -> SQL engine <-> file util
+                                               <-> s3 parquet
+#time range for cost down (time, network, etc)
+
+SparkSQL pk hive
+tuning spark application knowledge can be reused in SparkSQL
+table and udf, reused
+
+Q: table schema
+A: hive metastore (mysql), hivecontext
+
+spark 1.5: avoid java, dataframe will be powerful than before
+
+Storage for Spark SQL
+1. Cassandra: easy to use, easy to scale up, not easy to maintain, not easy to tune, hide all heavy stuff inside the platform
+2. AeroSpike: no sql, data in ssd, redist, easy to scale, easy to maintain, good performance, expensive
+3. HDFS + file: low cost, stable, easy to scale up, implement all the detail, implement all the maintain script
+
+Parquet: from google dremel paper, file system
+column format storage
+support nested data struncture (list, map) support json
+
+Column storage
+File speed up
+#column pruning -> select name from table1
+#predicate pushdown -> select * from table1 where age > 20
+
+Different encoding
+壓縮方式, 可以壓得更小
+run length encoding
+delta encoding
+dict encoding
+predic encoding
+
+Text > RCFile > Parquet > ORCFile
+
+SparkSQL treat Parquet/Json at first 
+ORC, RCFile is not on their plan
+
+Schema migration: schema merge 1.4+
+
+NFS network file system
+
+File(parquet) is better storage than any other DB
+
