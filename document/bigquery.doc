@@ -56,4 +56,8 @@ https://github.com/GoogleCloudPlatform/google-analytics-premium-bigquery-statist
 moritani@google.com
 roti@google.com
 
+bigtable for iterative tuning 
+
+-> pub/sub(service on the cloud) -> dataflow -> bigquery (support streaming) 
+
 
