@@ -1,0 +1,59 @@
+#20150916
+#Google big query sharing
+#@Google office
+
+Saas query tool
+
+Value of big data
+Everything can be shared
+Solve user acquisition and retention
+Data is product
+Data predicts the future 
+
+#google's solution
+Hire great generalist
+Empower them with services, not software
+Services that scale seamlessly
+Services that are easy to use and maximize productivity
+
+Dremel - big query
+FlumeJava - Cloud dataflow
+Bigtable - cloud bigtable
+Pubsub -  cloud pubsub
+
+Bigquery - SQL on cloud
+3.28TB -> 24.3s
+24G -> 8s
+
+Analytic db
+Store PB of data and run very fast sql query
+Complexity is abstracted away automagically
+Only pay for what you use
+
+Manage the Entire Lifecycle of big data
+Capture, Process, Store, Analyze
+
+specify schema, columns, textfile then import it 
+
+spreadsheets -> directly query in excel cell!
+
+support udf already this month
+
+<google cloud storage> -- GCS hadoop connector -- <hadoop on compute engine>
+||
+<google bigquery> -- <qlikview, excel, application>
+
+How with little effort for creating biz value?
+
+Binary data (storage in GCS)
+
+no need to optimize performance (by google)
+
+#Real-time analytics with bigquery
+
+https://github.com/GoogleCloudPlatform/google-analytics-premium-bigquery-statistics
+
+moritani@google.com
+roti@google.com
+
+
