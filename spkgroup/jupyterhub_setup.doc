@@ -1,0 +1,42 @@
+#Objectives: 
+#Thanks to Larry Lo
+#Website: https://github.com/jupyter/jupyterhub
+
+#Installation
+
+// Install development tools
+$ yum groupinstall "Development tools"
+$ yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
+
+// Install Python 3.4.3
+$ wget https://www.python.org/ftp/python/3.4.3/Python-3.4.3.tgz
+$ tar zxvf Python-3.4.3.tgz
+$ cd Python-3.4.3; ./configure 
+$ ./configure --prefix=/usr/local --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
+$ make && make altinstall
+
+// install nodejs
+$ curl --silent --location https://rpm.nodesource.com/setup | bash -
+$ yum -y install nodejs
+$ npm install -g configurable-http-proxy
+
+// Install pip3
+$ wget https://bootstrap.pypa.io/get-pip.py
+$ python3.4 get-pip.py
+
+// Install JupyterHub
+$ pip3 install jupyterhub ipython[notebook]
+
+// Start the server
+$ nohup jupyterhub >> /var/log/jupyterhub.log 2>&1 &
+
+// If you want to add python2.7 in kernal
+$ python2.7 -m IPython kernelspec install-self
+
+// Stop service
+$ ps aux | grep "keyword"
+$ kill -9 pid
+
+
+
+
