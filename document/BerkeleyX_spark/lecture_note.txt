@@ -1,0 +1,554 @@
+
+
+Once the VM is running
+http://10.1.207.127:8001/
+http://127.0.0.1:8001/
+
+vagrant halt
+vagrant up
+
+data = sc.textFile("/Users/etu/spark-1.3.0/data/mllib/kmeans_data.txt")
+parsedData = data.map(lambda line: array([float(x) for x in line.split(' ')]))
+
+accum=sc.accumulator(0)
+rdd=sc.parallize([1,2,3,4])
+def f(x):
+    glocal accum
+    accum += x
+rdd.foreach(f)
+accum.value
+
+file=sc.textFile(inputFile)
+blanklines=sc.accumulator(0)
+def extractCallSigns(line):
+    global blanklines
+    if (line==""):
+        blanklines+=1
+    return blanklines
+
+callsigns=file.flatMap(extractCallSigns)
+print blanklines.value
+
+sqlite3 my_database.sqlite
+
+crevettestudio@gmail.com
+
+
+/Users/etu/Desktop/kaggle/spam/userSpam.txt
+column: userID
+
+/Users/etu/Desktop/kaggle/spam/userlog.txt
+column: 
+"author":"1959c3059114ab170b170eaf4ba4e49b8a0f048f"
+"operate_at"1427817600,
+"operate_date":"2015-04-01T00:00:00+08:00"
+"action":"c1cc78dd7f67dd388967603b72547b4856f97c37"
+
+#get 1st col
+cut -f 1 -d , testsort.txt
+
+#distinct author: 160037
+sort -u -t, -k1,1 testsort.txt | wc -l
+
+#userlog row: 11596760
+#userspam row: 264
+
+sudo pip install pyzmq jinja2 tornado mistune jsonschema pygments terminado
+
+
+
+export SPARK_CLASSPATH=$SPARK_CLASSPATH:/usr/lib/hive/lib/*:/etc/hive/conf
+
+https://github.com/databricks/learning-spark/blob/master/files/testweet.json
+master1 pyspark root
+
+select count(*)
+from ec_testing_exportdata_tbl
+where act = '';
+
+select ip, count(distinct urefid) as cnt
+from ec_testing_exportdata_tbl
+where urefid <> ''
+group by ip
+having count(distinct urefid) > 1
+limit 10;
+
+select eruid, count(distinct ssid) as cnt
+from ec_testing_exportdata_tbl
+where eruid <> ''
+group by eruid
+having count(distinct ssid) > 10
+
+select count(distinct eruid)
+from ec_testing_exportdata_tbl
+
+
+select eruid, count(distinct ssid) as cnt
+from ec_testing_exportdata_tbl
+where eruid <> ''
+group by eruid
+order by count(distinct ssid) desc limit 10
+
+select count(urefid), count(distinct urefid)
+from ec_testing_exportdata_tbl
+where urefid <> ''
+
+select time, act, ssid
+from ec_testing_exportdata_tbl
+where eruid='d3e0256f-f9cc-2712-37e7-9c3b74e0b611'
+order by time
+
+#import
+>>> from pyspark.sql import HiveContext, Row
+#create SQL context in python
+>>> hiveCtx = HiveContext(sc)
+>>> inputfile='/user/root/testweet.json'
+>>> input = hiveCtx.jsonFile(inputfile)
+#register input schema rdd
+>>> input.registerTempTable("tweets")
+>>> input.show()
+>>> input.printSchema()
+>>> topTweets = hiveCtx.sql("SELECT text, retweetCount FROM tweets ORDER BY retweetCount")
+
+gg = hiveCtx.sql("SHOW databases")
+gg = hiveCtx.sql("use ec")
+
+hive -e 'select * from ec.ec_testing_exportdata_tbl' | sed 's/[[:space:]]\+/,/g' > /root/tmp/temp.csv
+
+create EXTERNAL table test_url_10 ( url string ) row format delimited fields terminated by ',' LOCATION '/user/hive/warehouse';
+
+INSERT into TABLE test_url_10 select url from ec_testing_exportdata_tbl limit 10;
+
+top3= hiveCtx.sql("SELECT dates FROM ec.ec_testing_exportdata_tbl limit 3")
+
+totalcnt = hiveCtx.sql("SELECT dates, uid FROM ec_testing_exportdata_tbl group by dates")
+
+#in python
+from geoip import geolite2
+
+match = geolite2.lookup(string)
+country = match.country
+
+#in pyspark
+happy = sc.parallelize([Row(name="Gordon",ip="17.0.0.1"),
+                     Row(name="Katrina",ip="140.112.0.59"),
+                     Row(name="Graham",ip="132.157.0.0")])
+
+log = sqlContext.createDataFrame(happy)
+log.registerTempTable("log")
+
+sqlCtx.sql("select ip, getCountry(ip) as country from log").show()
+
+df2 = sqlCtx.table("ec_testing_exportdata_tbl")
+
+agent        count
+Mobile       29330
+Others       112
+Tablet       39988
+TouchCapable 4157
+bot          5
+pc           428992
+count=502584
+
+lo	cntip	cntdip
+	1	1
+0	304319	47199
+1	198264	13215
+
+select lo, count(ip) as cntip, count(distinct ip) as cntdip
+from ec_testing_exportdata_tbl
+group by lo
+
+select cnt, count(*) as cnt
+from 
+(
+select ip, time, cnt
+from
+(
+select ip, time , count(*) as cnt
+from ec_testing_exportdata_tbl
+group by ip, time 
+)a
+)b
+group by cnt 
+order by cnt 
+
+
+
+sqlCtx.registerFunction("getCountry", lambda x: get_country_from_line(x))
+sqlCtx.sql("select ip, getCountry(ip) as country from log").show()
+
+def get_country_from_line(ip):
+    try:
+        from geoip import geolite2
+        match = geolite2.lookup(ip)
+        if match is not None:
+            infos = match.get_info_dict()
+            city = infos['city']['names']['en']
+            country = infos['country']['names']['en']
+            return city+','+country
+        else:
+            return "Unknown"
+    except IndexError:
+        return "Error"
+
+select act, count(*) as cnt
+from ec_testing_exportdata_tbl
+where predn <> ''
+group by act
+
+select hostname, count(hostname)
+from ec_testing_exportdata_tbl
+group by hostname
+order by count(hostname) desc
+limit 20
+
+select predn, count(predn) as cnt
+from ec_testing_exportdata_tbl
+group by predn
+order by count(predn) desc
+limit 20
+
+select ip, time, hostname, act, paypid, pcat
+from ec_testing_exportdata_tbl
+where ip= '1.160.119.119'
+and paypid <> ''
+
+select time, act, pid, keywords, paypid, qty
+from ec_testing_exportdata_tbl
+where ip= '1.160.119.119'
+
+select time, uid, eruid, lo, act, pid, keywords, paypid, qty
+from ec_testing_exportdata_tbl
+where ip= '210.61.233.200'
+order by time
+
+select time, uid, lo, act, pid, keywords, paypid, qty
+from ec_testing_exportdata_tbl
+where eruid='67aec404-7e6c-1193-90f3-55f9cac3db'
+order by time
+
+select eruid
+from ec_testing_exportdata_tbl
+where act = 'order' 
+limit 10; 
+
+select time, uid, lo, act, pid, keywords, paypid, qty, predn, hostname
+from ec_testing_exportdata_tbl
+where eruid='564e1a61-6d61-f92d-74b6-53b874e728c3'
+order by time
+
+select time, uid, lo, act, pid, keywords, paypid, qty, predn, hostname
+from ec_testing_exportdata_tbl
+where eruid='d6c2535f-7e7-a632-17a8-47e9a2a0b488'
+order by time
+
+select eruid, time, oid, act, pid, qty, unit_price, lo, predn
+from ec_testing_exportdata_tbl
+where eruid='564e1a61-6d61-f92d-74b6-53b874e728c3'
+order by time
+limit 40;
+
+select qty, count(*)
+from ec_testing_exportdata_tbl
+where qty <> ''
+group by qty
+order by qty desc 
+
+select predn, count(*) as cnt
+from ec_testing_exportdata_tbl
+where eruid in (
+select eruid
+from ec_testing_exportdata_tbl
+group by eruid
+having count(distinct ssid) > 10 
+)
+group by predn
+order by count(*) desc 
+
+$330＋36 + 15*2
+7.7km 10min+20min+20min
+
+118+200
+3.9km 60min+15min
+
+export PATH=$PATH:$SPARK_HOME/bin
+vim ~/.bash_profile
+
+502584
+502583
+
+>>> from pyspark.sql import SQLContext
+>>> sqlContext = SQLContext(sc)
+>>> df = sqlContext.jsonFile(path)
+>>> df.registerTempTable("people")
+>>> test=sqlContext.sql("SELECT text, retweetCount FROM people LIMIT 1")
+
+#schemaRDD->pythonRDD
+>>> test2 = test.map(lambda x: x.text)
+
+gg = hiveCtx.sql("SHOW databases")
+
+table_name = ec_testing_exportdata_tbl
+
+
+
+from pyspark.conf import SparkConf
+
+
+conf = SparkConf().setAll((("spark.cores.max", "320"),("spark.driver.memory","1g"),("spark.executor.memory","1g"),("spark.python.worker.memory", "1g")))
+
+sc = SparkContext(conf=conf)
+
+pyspark --num-executors 1 --driver-memory 1g --executor-memory 1g
+
+
+
+
+from pyspark.sql import SQLContext
+sqlContext = SQLContext(sc)
+
+http://210.63.38.218:4040
+
+from user_agents import parse
+from pyspark.sql import HiveContext, Row
+hiveCtx = HiveContext(sc)
+
+hiveCtx.registerFunction("getDevice", lambda x: parse(x).device.family)
+hiveCtx.registerFunction("getBrowser", lambda x: parse(x).browser.family)
+hiveCtx.registerFunction("getOS", lambda x: parse(x).os.family)
+
+def deviceDetect(string):
+    user_agt = parse(string)
+    if user_agt.is_mobile:
+        device = "Mobile"
+    elif user_agt.is_tablet:
+        device = "Tablet"
+    elif user_agt.is_touch_capable:
+        device = "TouchCapable"
+    elif user_agt.is_pc:
+        device = "pc"
+    elif user_agt.is_bot:
+        device = "bot"
+    else:
+        device = "Others"
+    return device
+
+hiveCtx.registerFunction("getSDevice", lambda x: deviceDetect(x))
+ 
+gg = hiveCtx.sql("use ec")
+agent = hiveCtx.sql("select eruid, time, getSDevice(agent) as device from ec.ec_testing_exportdata_tbl")
+
+scp /opt/hive-1.2.1/hcatalog/etc/hcatalog/proto-hive-site.xml sp2:/opt/spark-1.4.1-bin-hadoop2.6/conf/
+
+CREATE TABLE access_log (
+  host string,
+  client_identd string,
+  user_id string,
+  stime string,
+  method string,
+  endpoint string,
+  protocol string,
+  response_code int,
+  last_page string,
+  agent string,
+  browser string,
+  os string
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' 
+STORED AS TEXTFILE;
+
+load data inpath '/user/erica/access_log.txt' into table access_log;
+
+df = sqlContext.read.json("file:///Users/etu/spark-1.3.0/examples/src/main/resources/people.json")
+
+df.show()
+
+export PATH=/root/anaconda/bin:$PATH
+export IPYTHON_OPTS="notebook --notebook-dir=/root/tmp --pylab inline"
+
+>>> c
+'"Mozilla/5.0 (Windows NT 6.1)"'
+LOG_PATTERN='"(\S+) \(([^\)]+)\)"'
+
+>>> c
+'"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.89 Safari/537.1; 360Spider"'
+LOG_PATTERN='\"(.+?)\"'
+
+CREATE TABLE pixnet_user_log (
+  author string,
+  timehash string,
+  time string,
+  action string
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' 
+STORED AS TEXTFILE;
+
+load data inpath '/user/erica/userlog.txt' into table pixnet_user_log;
+
+agent = hiveCtx.sql("select eruid, time, getSDevice(agent) as device, getBrowser(agent) as browser, getOS(agent) as OS from ec_testing_exportdata_tbl")
+
+scp /opt/hive-1.2.1/conf/hive-site.xml sp2:/opt/spark-1.4.1-bin-hadoop2.6/conf/
+
+df.toPandas().save('mycsv.csv')
+df.save('mycsv.csv', 'com.databricks.spark.csv')
+
+> $spark-shell --packages com.springml:spark-salesforce_2.10:1.0.1
+> pyspark --packages com.springml:spark-salesforce_2.10:1.0.1
+#com.databricks:spark-csv_2.11:1.2.0-s_2.11
+
+
+agent.saveAsTable(tableName="ec_testing_agent_tb")
+
+[root@master1 ~]# hadoop fs -ls /user/hive/warehouse/ec.db/ec_testing_agent_tb
+Found 2 items
+-rw-r--r-- 2 root hive 497 2015-08-19 17:01 /user/hive/warehouse/ec.db/ec_testing_agent_tb/_metadata
+drwxr-xr-x - root hive 0 2015-08-19 17:01 /user/hive/warehouse/ec.db/ec_testing_agent_tb/_temporary
+
+
+
+
+df = sqlContext.load(source="com.databricks.spark.csv", header="true", path = "cars.csv")
+df.select("year", "model").save("newcars.csv", "com.databricks.spark.csv")
+
+agent.saveAsTable(tableName="ec_testing_agent_tb")
+
+/etc/hive/conf/hive-site.xml
+/etc/spark/conf
+
+test=sqlContext.sql("SELECT count(*) FROM people")
+
+from pyspark.sql import HiveContext, Row
+hiveCtx = HiveContext(sc)
+happy = sc.parallelize([Row(name="gorgon",beverage="coffee"),Row(name="katrina",beverage="tea")])
+happySchemaRDD = hiveCtx.inferSchema(happy)
+
+
+from pyspark.sql import SQLContext, Row
+sqlContext = SQLContext(sc)
+happy = sc.parallelize([Row(name="gorgon",beverage="coffee"),Row(name="katrina",beverage="tea")])
+people = sqlContext.createDataFrame(happy)
+
+people.write.parquet("file:///home/erica/people2.parquet")
+df1 = sqlContext.read.parquet("file:///home/erica/people2.parquet")
+
+#IBM done
+people.write.json("file:///home/erica/people2.json")
+df = sqlContext.read.json("file:///home/erica/people2.json")
+
+
+happySchemaRDD.saveAsParquetFile("people.parquet")
+parquetFile = hiveCtx.parquetFile("people.parquet")
+parquetFile.registerTempTable("parquetFile")
+test=hiveCtx.sql("SELECT name, beverage FROM parquetFile")
+
+happySchemaRDD.registerTempTable("happy_people")
+test=hiveCtx.sql("SELECT name, beverage FROM happy_people")
+keys=test.map(lambda x: x[0])
+
+>>> test
+DataFrame[name: string, beverage: string]
+>>> keys
+PythonRDD[17] at RDD at PythonRDD.scala:42
+
+valuess=test.map(lambda x: x[1])
+
+/opt/spark-1.3.0-bin-cdh4/sbin/start-thriftserver.sh --master spark://bi-hd03.vpon.idc:7077 -hiveconf hive.server2.thrift.port=10001
+
+/usr/lib/spark/bin/compute-classpath.sh
+
+CLASSPATH="$CLASSPATH:/usr/lib/hive/lib/*"
+
+/usr/lib/hive/lib/hive-common-0.13.1-cdh5.3.1.jar!/hive-log4j.properties
+/usr/lib/hive/lib/*
+
+/usr/lib/spark/sbin/start-thriftserver.sh
+
+/usr/lib/spark/bin/spark-sql
+
+#find java home
+java -showversion -verbose 2>&1 | head -1
+
+vim ~/.bashrc
+export JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera
+
+./sbt/sbt -Phive-thriftserver assembly
+
+/opt/spark-1.4.1-bin-hadoop2.6/examples/src/main/resources/people.json
+/user/erica/people.json
+
+
+docker build -t spark_labs .
+docker run -it --rm spark_labs /bin/bash
+
+# Infer the schema, and register the DataFrame as a table.
+schemaPeople = sqlContext.createDataFrame(people)
+schemaPeople.registerTempTable("people")
+
+# SQL can be run over DataFrames that have been registered as a table.
+teenagers = sqlContext.sql("SELECT name FROM people WHERE age >= 13 AND age <= 19")
+
+
+
+ec_testing_exportdata_tbl
+
+更改：vim /usr/bin/cobblerd
+library(RJDBC)
+df.filter(df.name > 21).show()
+df.filter(df.act=='cart').show(3)
+
+df = sqlCtx.sql("select * from ec_testing_exportdata_tbl") 
+sqlCtx.sql("select eruid from ec_testing_exportdata_tbl \
+where lo=1").show(2)
+
+require(RJDBC)  
+cp <- c(list.files("/location/lib/hadoop/lib", pattern = ".jar", full.names=TRUE, recursive=TRUE), list.files("/location/lib/hive/lib", pattern = ".jar", full.names=TRUE, recursive=TRUE), recursive=TRUE))  
+drv <- JDBC(driverClass = "org.apache.hadoop.hive.jdbc.HiveDriver", classPath = cp) 
+
+cp <-c(list.files("/usr/lib/hive/lib",pattern="jar$",full.names=T),list.files("/usr/lib/hadoop/lib",pattern="jar$",full.names=T))
+
+drv <- JDBC(driverClass = "org.apache.hive.jdbc.HiveDriver",
+            classPath = cp)
+
+drv <- JDBC(driverClass = "org.apache.hive.jdbc.HiveDriver",
+            classPath = list.files("/usr/lib/hive/lib",pattern="jar$",full.names=T),
+            identifier.quote="'")
+
+conn <- dbConnect(drv, "jdbc:hive2://210.63.38.218:10000/default", "etu", "etusolution")
+
+sqlContext.sql("select act, count(*) as cnt from ec_testing_exportdata_tbl group by act").show()
+
+setenv('HADOOP_HOME','/opt/hadoop-2.6.0');
+ds = datastore('hdfs://10.110.147.119:9000/user/bryan/grid-access_log') 
+
+/usr/lib/spark/sbin/start-thriftserver.sh -hiveconf hive.server2.thrift.port=10001
+
+https://210.63.38.218:9999
+
+#./bin/spark-submit --master spark://cdh4-dn2:7077 --executor-memory 3g --driver-memory 1g /home/erica_li/proj/spark_1D/pandora/modules/luigi_1d/bin/simple.py -d "2:Gender:C,3:Age:C,9:Money:N" -i hdfs://cdh4-n.migosoft.com/user/erica_li/spktest.dat
+
+%pylab inline
+from pyspark import SparkContext
+#sc = SparkContext('local', 'pyspark')
+print sc
+
+from pyspark.sql import SQLContext, Row
+sqlContext = SQLContext(sc)
+
+sc.addPyFile('/Users/etu/Desktop/kaggle/input/pyspark_csv.py') 
+
+import os
+import pyspark_csv as pycsv
+
+plaintext_rdd = sc.textFile("/Users/etu/Desktop/kaggle/input/icdm/cookies_n20.tsv")
+dataframe = pycsv.csvToDataFrame(sqlContext, plaintext_rdd, sep="\t")
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+cookie = pd.read_csv('/Users/etu/Desktop/kaggle/input/icdm/cookies.tsv', sep='\t')
+
+
+typeError: object of type 'NoneType' has no len() 
