@@ -1,0 +1,22 @@
+#install ipython
+sudo easy_install pip
+
+#alias ll
+vim ~/.bash_profile
+
+export CLICOLOR=true
+if [ -f ~/.bashrc ]; then
+  source ~/.bashrc
+fi
+
+vim ~/.bashrc
+alias ll='ls -al'
+
+#install wget
+curl -O http://ftp.gnu.org/gnu/wget/wget-1.14.tar.gz
+tar xvzf wget-1.14.tar.gz
+cd wget-1.14
+./configure --with-ssl=openssl
+make
+sudo make install
+
