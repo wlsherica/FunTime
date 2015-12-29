@@ -1,0 +1,87 @@
+# 2015-12-29 Google tensorflow and deep learning 
+
+# Google brain project
+- Large dataset
+- Large amounts of computation
+
+# What is ML?
+- AI and ML, a smart program for AI
+- e.g. spam detection? the old way is writing a program with explicit rules to follow, however, the new way will be a program to learn from examples. try to classify email, etc.
+
+# What is DL?
+- a ML model
+- modern reincarnation of ANN 
+- the core isn't different from ANN
+- collection of simple, trainable math functions
+- a way we know about the brain 
+- what deep for? neuron
+- Each neuron is a relatively simple math function
+- Working together, powerful
+
+- a single neuron
+- add nonlinearity (ReLU), b1 = max(b1,0)
+- learn parameters, set expected target, min diff(target, b2) for example
+- diff: a loss function that defines the diff measure (optimization)
+- Gradient descent is an useful way to solve problem (non-linear function), chain rule, etc.
+- back-propagation
+- a way to compose and optimize a set of nonlinear funstion
+
+# DL application by Google
+- category discovery in video
+- speech recognition (DL, smart way to nail it), e.g. FB, apple, etc.
+- annotating images with text
+- self-driving cars? (for strangers detection)
+- reading text from images, street number detection
+
+# growing use of DL at Google
+- awesome
+
+# Why DL?
+- universal ML that works better than the alternatives
+
+# Why it suddenly works so well?
+- ML is a rocket engine by Andrew Ng
+- Data is the rocket fuel! Data is the one
+- A simple ML algorithm that scales to more data generally beats a fancier algorithm that can't
+
+# Large datasets + powerful models
+- lots of computation
+- large-scale parallelism using distributed systems
+- exp turnaround time and research productivity
+
+# Model parallelism
+- best way to decrease training time
+- decrease the step time
+- many models have lots of inherent parallelism 
+
+- exploiting model parallelism,  single core SIMD, pretty much free
+- across cores, thread parallelism, almost free, (QPI on intel)
+- across devices (advanced level), for GPUs, often limited by PCIe bandwidth
+- across machines, limited by network bandwidth/latency
+
+# layer reuse
+# data paralleism 
+- use multiple model replicas to process different examples at the same time
+- data parrllelism asynchronous distributed SGD
+- speedups depend highly on kind of model
+- e.g. Dense models -> 10-40X speedup from 50 replicas
+- e.g. Sparse models -> support many more replicas, ~1000
+- case by case, anyway
+
+# data parallelism choices
+- Synchronously, N replicas equivalent to an N times larger batch size
+* pro: no gradient staleness
+* con: less fault tolerant (requires some recovery if any single machine fails)
+- Asynchronously
+* pro: relatively fault tolerant
+
+# considerations
+- reduce parameters network
+- models with fewer parameters, that resue each parameter multiple times in the computation
+- mini-batches of zie B reuse parameters B times
+- convolutional models
+- recurrent models (LSTMs, RNNs)
+
+# LSTMs end-to-end
+- speech -> acoustics -> phonetics -> language -> text
+
