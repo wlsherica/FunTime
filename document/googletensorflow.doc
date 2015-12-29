@@ -85,3 +85,116 @@
 # LSTMs end-to-end
 - speech -> acoustics -> phonetics -> language -> text
 
+# RankBrain
+- ML the third most important individual singnal in google search ranking
+- video Thumbnails
+
+# deepdream
+- transform picture from what's learned by a deep model
+- learning from unlabeled images
+- train on 10 million images (youtube), 1000 machines for one week 1.15 billion parameters
+
+# tensorflow (2nd system)
+- expressing high-level ML computations
+- Core in C++
+
+[C++] [Python]
+[Core tensorflow execution system]
+[CPU]   [GPU]   [Android]    [iOS]
+
+# open models
+# tensorflow tutorial
+- tensor: n-dimensional arrays
+- import tensorflow as tf
+
+- how to define tensors
+- Variable(<initual-value>,name=<>optional-name)
+
+tf.Variable(tf.random_normal([3,3]), name='w')
+y=tf.matmul(x,w)
+relu_out=tf.nn.relu(y)
+result = sess.run(relu_out)
+
+                [ReLU]
+                  |
+[Variable] ->  [MatMul]
+                  |
+                  x
+
+# code so far defines a data flow graph
+# each variable corresponds to a node in the graph, not the result!!!
+# needs to specify how we want to execute the graph
+
+# Session: manage resource for graph execution
+- sess.run()
+# Fetch: retreve content from a node
+
+           fetch---
+                   |
+---------------------------
+                [ReLU]    |
+                   |      |
+ [Variable] ->  [MatMul]  |
+                   |      |
+                   x      |
+---------------------------
+                   |
+           feed ----
+# initialize variable: variable is an empty node, fill in the content of a var node
+
+sess.run(tf.initialize_all_variables())
+print sess.run(relu_out)
+
+# How about x?
+- Placeholder, its content will be fed
+
+x = tf.placeholder("float",[1,3])
+
+# Feed?
+- pump liquid into the pipe (numpy array)
+
+print sess.run(relu_out, feed_dict={x.np.array([[1.0,2.0,3.0]])})
+
+# session management
+- sess.close()
+
+# Softmax?
+- make prediction for n targets that sum to 1
+
+softmax = tf.nn.softmax(relu_out)
+-> unbounding to probability
+
+# Prediction diff
+# Define loss functions
+- loss fun for softmax
+- softmax_cross_entropy_with_logits(logits, labels, name=<optional-name>)
+
+# Gradient descent 
+- class GradientDescentOptimizer
+- (learning rate)
+
+optimizer = tf.train.GDP
+train_op = optimizer.minimize(cross_entropy)
+
+# iteratie update
+- add for loop
+
+for step in range(10):
+    sess.run(train_op, feed_dict={x:np.array([[1,2,3]]),labels:answer})
+
+# Softmax layer
+# add biases
+
+# make it deep
+- add for loop, easy
+
+# TensorBoard, visulize the graph
+# save and load models
+- tf.train.Saver()
+
+# skip-gram text model
+- know a word by a company
+
+# word2Vec
+
+
