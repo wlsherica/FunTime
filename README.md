@@ -1,7 +1,7 @@
 FunTime
 =======
 
-No pain, no gain :p
+No pain, no gain
 
 - Interesting collection
 - Apache Spark, MongoDB, Python, Github, Hive, Luigi...etc
